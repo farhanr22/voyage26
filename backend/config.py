@@ -1,0 +1,28 @@
+import os
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+load_dotenv(os.path.join(basedir, '.env'))
+
+class Config:
+    
+    DEBUG = os.environ['FLASK_DEBUG'] == "1"
+    SECRET_KEY = os.environ['SECRET_KEY']
+    USE_SQLITE = os.environ['USE_SQLITE'] == "True"
+
+    if USE_SQLITE:
+        DB_NAME = os.environ['SQLITE_FILE']
+        DB_URL = f"sqlite:///{os.path.join(basedir, DB_NAME)}"
+        print(f"Started up using SQLITE : {DB_URL}")
+    else :
+        DB_URL= os.environ['DATABASE_URI']
+        print(f"Started up using DATABASE_URI")
+
+
+
+    # ---- APP CONFIG ----
+    
+    AMOUNT_SHIRT = 1100
+    AMOUNT_NOSHIRT = 900
+    BOOTHS = ["T-SHIRT", "TIFFIN"]

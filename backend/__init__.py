@@ -1,11 +1,12 @@
 # __init__.py
-from flask import Flask
+from flask import Flask, session
 import peewee
 from playhouse.db_url import connect
 
 from .config import Config
 from . import models
-from .models import db_proxy 
+from .models import db_proxy, Admins
+from .extensions import login_manager
 
 
 def create_app(config_class=Config):
@@ -13,8 +14,35 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Initialize DB connection
-    database_connection = connect(app.config['DB_URL'])
+    database_connection = connect(app.config["DB_URL"])
     db_proxy.initialize(database_connection)
+
+    login_manager.init_app(app)
+
+    from .views.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
+    from .views.main import main_bp
+    app.register_blueprint(main_bp)
+
+    from . import cli
+    cli.register_commands(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        try:
+            admin = Admins.get_by_id(user_id)
+        except Admins.DoesNotExist:
+            return None
+
+        db_session_version = admin.session_version
+        cookie_session_version = session.get("_session_version")
+
+        # If the versions don't match, the session is invalid (version increments on password change)
+        if db_session_version != cookie_session_version:
+            return None
+
+        return admin
 
     # --- Request Hooks ---
     @app.before_request
@@ -29,9 +57,6 @@ def create_app(config_class=Config):
     # --- Shell Context ---
     @app.shell_context_processor
     def make_shell_context():
-        return {
-            "db": models.db_proxy,
-            "md": models
-        }
+        return {"db": models.db_proxy, "md": models}
 
     return app

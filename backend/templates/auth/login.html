@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Voyage'25</title>
+    <meta name="robots" content="noindex, nofollow">
+    
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap Icons-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-icons.min.css') }}" >
+
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body class="w-100">
+
+    <main class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header text-center bg-dark text-white">
+                        <h5 class="my-2">Admin Portal</h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="" novalidate>
+                            {{ form.hidden_tag() }} <!-- CSRF Token -->
+
+                            <div class="mb-3">
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(class="form-control", placeholder="Enter your username") }}
+                            </div>
+
+                            {{ form.password.label(class="form-label") }}
+                            <div class="mb-3 input-group">
+                                {{ form.password(class="form-control", id="password-field", placeholder="Enter your password") }}
+                                <button class="btn btn-outline-danger" type="button" id="toggle-password-btn">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                            </div>
+
+                            {# will add hCaptha here later #}
+                            
+                            {{ form.submit(class="btn btn-primary w-100 mt-2") }}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        // Password visibility toggle
+        const togglePasswordBtn = document.getElementById('toggle-password-btn');
+        const passwordField = document.getElementById('password-field');
+        const icon = togglePasswordBtn.querySelector('i');
+
+        togglePasswordBtn.addEventListener('click', function () {
+            const isPassword = passwordField.type === 'password';
+            passwordField.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('bi-eye-fill');
+            icon.classList.toggle('bi-eye-slash-fill');
+        });
+    </script>
+    
+</body>
+</html>

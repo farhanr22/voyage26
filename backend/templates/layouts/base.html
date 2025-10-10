@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{% block title %}Voyage Admin{% endblock %}</title>
+    <link href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+	<style>
+		.navbar-brand img{
+			height : 36px;
+			margin-right: 12px;
+		}
+		.navbar-brand {
+			display: flex;
+			align-items: center;
+		}
+		.text-tight { letter-spacing: -0.5px; }
+	</style>
+	
+	{% block more_head %}{% endblock %}
+</head>
+<body class="bg-light">
+
+	<!--
+	{% block nav_active_value %}default{% endblock %}
+	{% set active_page = self.nav_active_value() %} -->
+	
+
+	<nav class="navbar navbar-expand-lg sticky-top shadow-sm bg-light"
+		styles="background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.08)); background-color: #e3f0fc;">
+        <div class="container-fluid">
+            <a class="navbar-brand font-monospace text-tight" href="{{ url_for('main.dashboard') }}">
+				<!-- <img src="#" alt="Admin Icon"> -->
+				Voyage Admin
+			</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                    </li>
+                    
+                </ul>
+				
+                <ul class="navbar-nav">
+
+					<li class="nav-item">
+						<a class="btn btn-outline-warning me-2 mb-2 mb-lg-0" href="#">
+							Change Password
+						</a>
+					</li>
+                    <li class="nav-item">
+						<a class="btn btn-outline-danger" href="{{url_for('auth.logout')}}">
+							Logout
+						</a>
+					</li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+	{% block scripts %}{% endblock %}
+</body>
+</html>

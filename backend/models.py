@@ -1,4 +1,5 @@
 import peewee as pw
+from flask_login import UserMixin
 
 
 # Proxy object for initializing the database later
@@ -51,9 +52,11 @@ class CR_Profiles(BaseModel):
     Batch = pw.CharField()
 
 
-class Admins(BaseModel):
+class Admins(BaseModel, UserMixin):
+    id = pw.AutoField()
     username = pw.CharField(unique=True)
     passhash = pw.CharField()
+    session_version = pw.IntegerField(null=False, default=1)
 
 
 class Booth_Operators(BaseModel):
@@ -69,6 +72,7 @@ class ItemsTaken(BaseModel):
     GivenBy = pw.CharField()
     Item = pw.CharField()
     TakenAt = pw.CharField()
+
 
 class UpdateMetadata(BaseModel):
     LastModified = pw.DateTimeField(null=True)

@@ -1,3 +1,5 @@
 Flask
 peewee
 python-dotenv
+flask-login
+Flask-WTF

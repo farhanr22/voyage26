@@ -7,7 +7,7 @@
 {% block more_head %}
 <style>
     .table-container {
-        overflow: hidden;
+        overflow-x: auto;
         border-radius: var(--bs-border-radius);
     }
 
@@ -47,12 +47,12 @@
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">Phone</th>
-                        <th scope="col">Stream</th>
+                        <th scope="col" style="min-width: 100px;">Stream</th>
                         <th scope="col">Shirt</th>
-                        <th scope="col">Food</th>
-                        <th scope="col">Payment</th>
+                        <th scope="col" style="min-width: 100px;">Food</th>
+                        <th scope="col" style="min-width: 155px;">Payment</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Student ID</th>
+                        <th scope="col" style="min-width: 100px;">Student ID</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,7 +76,7 @@
                             </td>
                             <td>{{ profile.FoodPref }}</td>
                             <td>
-                                <span class="badge me-1 text-dark-emphasis bg-dark-subtle" style="transform : translateY(-2px)">{{ profile.PaymentMethod }}</span> {% if not profile.Paid %}0{% else %}{{ profile.Paid }}{% endif %} / {{ profile.Payable }} 
+                                <span class="badge me-1 text-dark-emphasis bg-dark-subtle" style="transform : translateY(-2px)">{{ profile.PaymentMethod }}</span> {% if not profile.Paid %}0{% else %}{{ profile.Paid }}{% endif %}&nbsp;/&nbsp;{{ profile.Payable }} 
                                 
                             </td>
                             <td>

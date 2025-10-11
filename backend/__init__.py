@@ -25,6 +25,9 @@ def create_app(config_class=Config):
     from .views.main import main_bp
     app.register_blueprint(main_bp)
 
+    from .views.registrations import registrations_bp
+    app.register_blueprint(registrations_bp)
+
     from . import cli
     cli.register_commands(app)
 

@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Registration Management{% endblock %}
+{% block nav_active_value %}reg_view{% endblock %}
+
+{% block more_head %}
+<style>
+    .table-container {
+        max-height: 400px; 
+        overflow-y: auto;
+        position: relative;
+        border-radius: var(--bs-border-radius);
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: lavender;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.075);
+    }
+
+    table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <div class=" mb-2">
+            <h1>Registrations</h1>
+            <p class="lead">Manage and verify student registration entries. <a href="{{ url_for('registrations.view_all_registrations') }}" >View All Entries</a> or jump to a specific section below :</p>
+    </div>
+
+    <div class="mb-4 pb-1">
+        <ul class="list-inline">
+            <li class="list-inline-item mb-2"><a href="#verifiable" class="btn btn-sm btn-primary">Verifiable <span class="badge ms-1 bg-light text-dark">{{ data.verifiable|length }}</span></a></li>
+            <li class="list-inline-item mb-2"><a href="#verified" class="btn btn-sm btn-success">Verified <span class="badge ms-1 bg-light text-dark">{{ data.verified|length }}</span></a></li>
+            <li class="list-inline-item mb-2"><a href="#rejected" class="btn btn-sm btn-danger">Rejected <span class="badge ms-1 bg-light text-dark">{{ data.rejected|length }}</span></a></li>
+            <li class="list-inline-item mb-2"><a href="#unverifiable" class="btn btn-sm btn-warning">Unverifiable <span class="badge ms-1 bg-light text-dark">{{ data.unverifiable|length }}</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Verifiable Section -->
+    <div class="mb-5">
+        <h2 id="verifiable">Verifiable Registrations</h2>
+        <p class="text-muted">Students who have paid online, or paid via CR (with CR reporting the payment).</p>
+        {% if data.verifiable %}
+            <div class="card shadow-sm">
+                <div class="table-container">
+                    <table class="table table-hover mb-0 table-responsive">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Payment Method</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in data.verifiable %}
+                                <tr>
+                                    <td>{{ reg.Name }}</td>
+                                    <td>
+                                        {% if reg.PaymentMethod == 'Online' %}
+                                            <span class="badge bg-info">Online</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">CR</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('registrations.view_registration', subid=reg.SubID) }}" class="btn btn-sm btn-primary px-3">Verify</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">No registrations are currently verifiable.</div>
+        {% endif %}
+    </div>
+
+    <!-- Verified Section -->
+    <div class="mb-5">
+        <h2 id="verified" class="mb-3">Verified Registrations</h2>
+        {% if data.verified %}
+            <div class="card shadow-sm">
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-secondary">
+                            <tr class="">
+                                <th scope="col">Batch</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Method</th>
+                                <th scope="col">Verified By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in data.verified %}
+                                <tr>
+                                    <td>{{ reg.Stream }}</td>
+                                    <td>{{ reg.Name }}</td>
+                                    <td><span class="badge bg-secondary">{{ reg.PaymentMethod }}</span></td>
+                                    <td>{{ reg.VerifiedBy }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary">No registrations have been verified yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- Rejected Section -->
+    <div class="mb-5">
+        <h2 id="rejected" class="mb-3">Rejected Registrations</h2>
+        {% if data.rejected %}
+            <div class="card shadow-sm">
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Batch</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in data.rejected %}
+                                <tr>
+                                    <td>{{ reg.Name }}</td>
+                                    <td>{{ reg.Stream }}</td>
+                                    <td class="text-end">
+                                        {# This form's action points to the specific unreject URL for this user #}
+                                        <form method="POST" action="{{ url_for('registrations.unreject', subid=reg.SubID) }}" class="d-inline">
+                                            {{ unreject_form.hidden_tag() }} 
+                                            {{ unreject_form.submit(class="btn btn-sm btn-warning") }}
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary">No registrations have been rejected.</div>
+        {% endif %}
+    </div>
+
+    <!-- Unverifiable Section -->
+    <div class="mb-5">
+        <h2 id="unverifiable">Unverifiable Registrations</h2>
+        <p class="text-muted">Students who selected "CR" as payment method but have no matching CR payment entry.</p>
+        {% if data.unverifiable %}
+            <div class="card shadow-sm">
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Batch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in data.unverifiable %}
+                                <tr>
+                                    <td>{{ reg.Name }}</td>
+                                    <td>{{ reg.Stream }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary">No unverifiable CR payment registrations found.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

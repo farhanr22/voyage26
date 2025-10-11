@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}All Registration Entries{% endblock %}
+
+{% block nav_active_value %}reg_all{% endblock %}
+
+{% block more_head %}
+<style>
+    .table-container {
+        overflow: hidden;
+        border-radius: var(--bs-border-radius);
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: lavender;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.075);
+    }
+    
+    table td {
+        vertical-align: middle;
+    }
+    
+    .table-success td {
+        background-color : honeydew;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <h1>All Registration Entries</h1>
+        <p class="lead">A complete, unfiltered list of every student who has registered, along with their current status.</p>
+    </div>
+
+    <div class="card shadow">
+        <div class="table-container">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Stream</th>
+                        <th scope="col">Shirt</th>
+                        <th scope="col">Food</th>
+                        <th scope="col">Payment</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Student ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in profiles %}
+                        {# Add a subtle background color based on status for easy scanning #}
+                        {% set row_class = {
+                            'Verified': 'table-success',
+                            'Rejected': 'table-danger',
+                            'Pending': 'table-warning'
+                        }.get(profile.Status, '') %}
+                        <tr class="{{ row_class }}">
+                            <td>{{ profile.Name }}</td>
+                            <td>{{ profile.Phone }}</td>
+                            <td>{{ profile.Stream }}</td>
+                            <td>
+                                {% if profile.TShirtInt %}
+                                    {{ profile.TShirtSize }}
+                                {% else %}
+                                    <span class="text-muted">NO</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ profile.FoodPref }}</td>
+                            <td>
+                                <span class="badge me-1 text-dark-emphasis bg-dark-subtle" style="transform : translateY(-2px)">{{ profile.PaymentMethod }}</span> {% if not profile.Paid %}0{% else %}{{ profile.Paid }}{% endif %} / {{ profile.Payable }} 
+                                
+                            </td>
+                            <td>
+                                {% if profile.Status == 'Verified' %}
+                                    <span class="badge bg-success">Verified</span>
+                                {% elif profile.Status == 'Rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if profile.StudentID %}
+                                    <code>{{ profile.StudentID }}</code>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center p-4">No registration data found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+{% endblock %}

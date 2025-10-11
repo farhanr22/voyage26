@@ -41,7 +41,7 @@
 
     <div class="row g-4">
 
-        <div class="col-lg-8 order-2 order-lg-1">
+        <div class="col-lg-7 order-2 order-lg-1">
             <!-- Total Payments by CR -->
             <div class="card shadow-sm mb-4">
                 <h5 class="card-header">Total Payments by CR</h5>
@@ -97,49 +97,13 @@
 
 
 
-            <!-- Pending Online Registration -->
-            <div class="card shadow-sm">
-                <h5 class="card-header">Pending Online Registration</h5>
-                <div class="card-body">
-                    <p class="card-text text-muted">
-                        These students have paid their CR but have not completed the online registration form. Please
-                        inform the respective CRs.
-                    </p>
-                </div>
-                <!-- The table is placed outside the card-body to avoid extra padding -->
-                <div class="table-container">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Amount Paid</th>
-                                <th>CR Name</th>
-                                <th>Batch</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for x in pending_reg %}
-                            <tr>
-                                <td>{{ x.CRPaymentsName }}</td>
-                                <td>Rs. {{ x.CRPaymentsAmount }}</td>
-                                <td>{{ x.CRProfileName }}</td>
-                                <td>{{ x.CRProfileBatch }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center p-3">No pending online registrations found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+           
 
         </div>
 
         <!-- Right Column: Actionable Items -->
-        <div class="col-lg-4 order-1 order-lg-2">
-            <div class="card shadow-sm">
+        <div class="col-lg-5 order-1 order-lg-2">
+            <div class="card shadow-sm mb-4">
                 <h5 class="card-header">Verify 2nd Installments</h5>
                 <div class="card-body">
                     <p class="card-text text-muted">Verify pending installments for already-registered students. Contact admin to remove erroneous or duplicate entries.</p>
@@ -170,6 +134,41 @@
                     {% else %}
                     <div class="alert alert-success mt-2">No pending second installments found.</div>
                     {% endif %}
+                </div>
+            </div>
+
+            <!-- Pending Online Registration -->
+            <div class="card shadow-sm">
+                <h5 class="card-header">Pending Online Registration</h5>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        These students have paid their CR but have not completed the online registration form. Please
+                        inform the respective CRs.
+                    </p>
+                </div>
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Amount</th>
+                                <th>CR & Batch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for x in pending_reg %}
+                            <tr>
+                                <td>{{ x.CRPaymentsName }}</td>
+                                <td>Rs. {{ x.CRPaymentsAmount }}</td>
+                                <td>{{ x.CRProfileName }} <span class="text-muted ms-1"> ({{ x.CRProfileBatch }})</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center p-3">No pending online registrations found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

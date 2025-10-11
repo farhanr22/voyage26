@@ -1,0 +1,180 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_active_value %}cr_pay{% endblock %}
+
+{% block title %}CR Payments{% endblock %}
+
+{% block more_head %}
+<style>
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        position: relative;
+        border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: lavender;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, .075);
+    }
+
+    table td,
+    table th {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h1>CR Payments</h1>
+        <p class="lead">View statistics for payments collected by CRs and process pending installments.</p>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8 order-2 order-lg-1">
+            <!-- Total Payments by CR -->
+            <div class="card shadow-sm mb-4">
+                <h5 class="card-header">Total Payments by CR</h5>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for x in paybycr %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ x.Batch }}</strong> <span class="text-muted ms-1"> {{ x.Name }} &ndash; {{ x.Phone }}</span>
+                            </div>
+                            <span class="badge  {% if not x.TotalCollected  %} text-warning-emphasis bg-warning-subtle {% else %} text-success bg-success-subtle {% endif %}" 
+                                  style="font-size:0.8rem">
+                                Rs. {{ x.TotalCollected or 0 }} / {{ x.UniquePayments }} Payments
+                            </span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item">No CR payment data found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Matched Payments -->
+            <div class="card shadow-sm mb-4">
+                <h5 class="card-header">Matched Payments</h5>
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Batch</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Matched By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for x in matched %}
+                            <tr>
+                                <td>{{ x.Batch }}</td>
+                                <td>{{ x.Name }}</td>
+                                <td>Rs. {{ x.Amount }}</td>
+                                <td>{{ x.MatchedBy }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center p-3">No payments have been matched yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <!-- Pending Online Registration -->
+            <div class="card shadow-sm">
+                <h5 class="card-header">Pending Online Registration</h5>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        These students have paid their CR but have not completed the online registration form. Please
+                        inform the respective CRs.
+                    </p>
+                </div>
+                <!-- The table is placed outside the card-body to avoid extra padding -->
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Amount Paid</th>
+                                <th>CR Name</th>
+                                <th>Batch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for x in pending_reg %}
+                            <tr>
+                                <td>{{ x.CRPaymentsName }}</td>
+                                <td>Rs. {{ x.CRPaymentsAmount }}</td>
+                                <td>{{ x.CRProfileName }}</td>
+                                <td>{{ x.CRProfileBatch }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center p-3">No pending online registrations found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Actionable Items -->
+        <div class="col-lg-4 order-1 order-lg-2">
+            <div class="card shadow-sm">
+                <h5 class="card-header">Verify 2nd Installments</h5>
+                <div class="card-body">
+                    <p class="card-text text-muted">Verify pending installments for already-registered students. Contact admin to remove erroneous or duplicate entries.</p>
+                    {% if installments %}
+                    <ul class="list-group">
+                        {% for x in installments %}
+                        <li class="list-group-item py-3">
+                            <h6 class="mb-1">{{ x.RegDataName }} <span class="text-muted ms-1 fw-normal">({{ x.RegDataStream }})</span></h6>
+                            <p class="mb-2">
+                                <small>
+                                    Previously paid <strong>Rs. {{ x.Paid }}/{{ x.Payable}}</strong>
+                                </small>
+                                <br>
+                                <small>
+                                    Installment : <strong class="text-success">Rs. {{ x.CRPaymentsAmount }}</strong> paid to {{ x.CRProfileName }}
+                                </small>
+                            </p>
+
+                            <form method="POST" action="{{ url_for('cr_payments.verify_installment') }}">
+                                {{ verify_form.csrf_token }}
+                                {{ verify_form.reg_data_subid(value=x.RegDataSubID) }}
+                                {{ verify_form.cr_payments_id(value=x.CRPaymentsID) }}
+                                {{ verify_form.submit(class="btn btn-sm btn-success w-100") }}
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="alert alert-success mt-2">No pending second installments found.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+{% endblock %}

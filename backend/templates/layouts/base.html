@@ -60,6 +60,10 @@
                                     href="{{ url_for('registrations.view_all_registrations') }}">View all</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'cr_pay' %}active{% endif %}"
+                            href="{{ url_for('cr_payments.dashboard') }}">CR Payments</a>
+                    </li>
                 </ul>
 
                 <ul class="navbar-nav">

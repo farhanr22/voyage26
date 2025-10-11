@@ -28,6 +28,9 @@ def create_app(config_class=Config):
     from .views.registrations import registrations_bp
     app.register_blueprint(registrations_bp)
 
+    from .views.cr_payments import cr_payments_bp
+    app.register_blueprint(cr_payments_bp)
+
     from . import cli
     cli.register_commands(app)
 

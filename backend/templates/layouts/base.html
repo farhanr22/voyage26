@@ -70,6 +70,10 @@
                         <a class="nav-link {% if active_page == 'cr_pay' %}active{% endif %}"
                             href="{{ url_for('cr_payments.dashboard') }}">CR Payments</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'booths' %}active{% endif %}"
+                            href="{{ url_for('booth.dashboard') }}">Booths</a>
+                    </li>
                 </ul>
 
                 <ul class="navbar-nav">

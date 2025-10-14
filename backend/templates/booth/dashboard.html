@@ -1,0 +1,157 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_active_value %}booths{% endblock %}
+
+{% block title %}Booth Management{% endblock %}
+
+{% block more_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-icons.min.css') }}" >
+
+<style>
+    .table-container {
+        max-height: 500px;
+        overflow-x: auto;
+        border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    }
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: lavender;
+    }
+    table td, table th { 
+        vertical-align: middle; 
+    }
+
+    .moveup {
+        transform: translateY(-0.1em);
+    }
+    .bg-success-subtle {
+        background-color: #ddf7dc !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h1>Booth Management</h1>
+        <p class="lead mb-1">Add or remove booth operators and view a log of all dispatched items.</p>
+        <p class="text-muted mt-1">
+            Current Booth links :
+            {% for booth in config.BOOTHS %}
+                <a href="/booth/{{ booth }}" class="badge text-bg-secondary text-decoration-none me-1 rounded-1 moveup">{{ booth }}</a>
+            {% endfor %}
+        </p>
+    </div>
+  
+
+    <div class="row g-4">
+        {# Right column (appears first on mobile) #}
+        <div class="col-lg-5 order-1 order-lg-2">
+            <div class="card shadow-sm">
+                <h5 class="card-header">Add Booth Operator</h5>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('booth.dashboard') }}" novalidate>
+                        {{ add_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ add_form.fullname.label(class="form-label mb-1") }}
+                            {{ add_form.fullname(class="form-control", placeholder="e.g., Jane Doe") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ add_form.username.label(class="form-label mb-1") }}
+                            {{ add_form.username(class="form-control", placeholder="A unique ID, e.g., janedoe") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ add_form.phone.label(class="form-label mb-1") }}
+                            {{ add_form.phone(class="form-control", placeholder="e.g., 9876543210") }}
+                        </div>
+                        {{ add_form.submit(class="btn btn-primary w-100") }}
+                        <span class="text-danger mt-3 d-block small">Operator IDs allow dispatching items. Share them cautiously.</span>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# Left column #}
+        <div class="col-lg-7 order-2 order-lg-1">
+
+            <div class="card shadow-sm mb-4">
+                <h5 class="card-header">Current Booth Operators</h5>
+                {% if operators %}
+                <ul class="list-group list-group-flush">
+                    {% for op in operators %}
+                    <li class="list-group-item position-relative">
+                        <div class="d-md-flex justify-content-between align-items-center">
+                            <div class="mb-2 mb-md-0">
+                                <strong >{{ op.Username }}</strong>
+                                <span class="text-muted mx-1">{{ op.Name }}</span>
+                                {% if op.items_count > 0 %}
+                                <span class="badge text-success-emphasis bg-success-subtle rounded-pill moveup">{{ op.items_count }} items</span>
+                                {% else %}
+                                <span class="badge text-warning-emphasis bg-warning-subtle rounded-pill moveup">0 items</span>
+                                {% endif %}
+                                <div class="mt-1 mb-1 text-muted">
+                                    <span class="badge bg-success-subtle text-success fw-normal">
+                                        <i class="bi bi-telephone me-1"></i>{{ op.Phone }}
+                                    </span>
+                                     &bull; 
+                                    <span class="small">Added by {{ op.AddedBy }}</span>
+                                </div>
+                            </div>
+                            
+                                {% if not op.RemovedBy %}
+                                <form method="POST" action="{{ url_for('booth.remove_operator', username=op.Username) }}">
+                                    {{ remove_form.hidden_tag() }}
+                                    {{ remove_form.submit(class="btn btn-outline-danger btn-sm btn-remove") }}
+                                </form>
+                                {% else %}
+                                <span class="badge bg-secondary-subtle text-dark p-2">Removed by {{ op.RemovedBy }}</span>
+                                {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="card-body">
+                    <p class="text-muted">No booth operators have been added yet.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card shadow-sm">
+                <h5 class="card-header">Dispatched Items Log</h5>
+                <div class="table-container">
+                    <table class="table table-hover mb-0">
+                        <thead style="font-size: 0.95rem;">
+                            <tr>
+                                <th>Item & Operator</th>
+                                <th style="min-width: 160px;">Recipient</th>
+                                <th style="min-width: 100px;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.9rem;">
+                            {% for item in given_items %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.Item }}</strong><br>
+                                    <span class="text-muted">{{ item.GivenBy }}</span>
+                                </td>
+                                <td>
+                                    {{ item.StudentName }}<br>
+                                    <small class="text-muted">{{ item.Stream }}</small>
+                                </td>
+                                <td>{{ item.TakenAt | datetimeformat }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center p-3">No items have been dispatched yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br>
+</div>
+{% endblock %}

@@ -31,8 +31,15 @@ def create_app(config_class=Config):
     from .views.cr_payments import cr_payments_bp
     app.register_blueprint(cr_payments_bp)
 
+    from .views.booth import booth_bp
+    app.register_blueprint(booth_bp)
+
     from . import cli
     cli.register_commands(app)
+    
+    from . import template_filters
+    app.jinja_env.filters['datetimeformat'] = template_filters.format_datetime_simple
+
 
     @login_manager.user_loader
     def load_user(user_id):

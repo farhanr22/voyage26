@@ -2,6 +2,8 @@ import random
 import string
 from datetime import datetime
 
+from flask import current_app
+
 from .models import UpdateMetadata, Reg_Data
 
 
@@ -42,3 +44,14 @@ def update_timestamp():
         metadata.save()
     except Exception as e:
         print(f"Error updating timestamp: {e}")
+
+
+def get_current_timestamp_str() -> str:
+    """
+    Returns the current time in the app's configured timezone
+    as a standardized ISO-like string.
+    Format: YYYY-MM-DDTHH:MM:SS
+    """
+    tz = current_app.config.get("TIMEZONE")
+    dt_now = datetime.now(tz)
+    return dt_now.strftime("%Y-%m-%dT%H:%M:%S")

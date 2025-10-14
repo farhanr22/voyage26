@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -22,6 +23,7 @@ class Config:
 
 
     # ---- APP CONFIG ----
+    TIMEZONE = ZoneInfo('Asia/Kolkata') 
     
     AMOUNT_SHIRT = 1100
     AMOUNT_NOSHIRT = 900

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ booth_item }} Booth - Voyage'25</title>
+    <link href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-icons.min.css') }}">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body data-item="{{ booth_item }}">
+    <div class="container py-4">
+        <h2 class="text-center mb-1">Voyage'25 Booth</h2>
+        <p class="text-center text-muted mb-4">You are at the <span class="fw-bold font-monospace">{{ booth_item
+                }}</span> booth.</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+
+                <div class="card shadow-sm mb-4">
+                    <h5 class="card-header"><i class="bi bi-person-badge me-2"></i>Operator Verification</h5>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="username"
+                                placeholder="Enter your Operator ID">
+                            <button class="btn btn-outline-secondary" type="button" id="userBtn">Verify ID</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <h5 class="card-header"><i class="bi bi-box-seam me-2"></i>Distribution</h5>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="qr" placeholder="Enter or Scan Student ID">
+                            <button class="btn btn-primary" type="button" id="regBtn">Fetch Details</button>
+                        </div>
+                        <div id="frag-container" class="mt-3">
+                            <p class="text-muted text-center">Profile details will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Toast Container for Notifications #}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    </div>
+
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        const boothItem = document.body.dataset.item;
+
+        // Toast Notification Function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            const toastIcon = {
+                success: '<i class="bi bi-check-circle-fill text-success me-2"></i>',
+                danger: '<i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>',
+                warning: '<i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>',
+                info: '<i class="bi bi-info-circle-fill text-info me-2"></i>'
+            }[type];
+
+            const toastHTML = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        ${toastIcon}
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>`;
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // Event Listeners
+        document.getElementById('userBtn').addEventListener('click', checkUsername);
+        document.getElementById('regBtn').addEventListener('click', checkRegistration);
+
+        async function checkUsername() {
+            const username = document.getElementById('username').value;
+            const response = await fetch('/booth-admin/check-username', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username })
+            });
+            const data = await response.json();
+            if (data.valid) {
+                showToast('Operator ID is valid.', 'success');
+            } else {
+                showToast('Unrecognized Operator ID.', 'danger');
+            }
+        }
+
+        async function checkRegistration() {
+            const username = document.getElementById('username').value;
+            const studentId = document.getElementById('qr').value;
+            const fragContainer = document.getElementById('frag-container');
+            fragContainer.innerHTML = '<p class="text-center">Loading...</p>';
+
+            const response = await fetch('/booth-admin/check-reg', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, id: studentId, item: boothItem })
+            });
+            const data = await response.json();
+            fragContainer.innerHTML = data.fragment;
+        }
+
+        async function dispatchItem(button) {
+            const username = document.getElementById('username').value;
+            const studentId = button.dataset.studentId;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Dispatching...';
+
+            const response = await fetch('/booth-admin/dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, id: studentId, item: boothItem })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast(data.message, 'success');
+                checkRegistration();
+            } else {
+                showToast(data.message, 'danger');
+                button.disabled = false;
+                button.innerHTML = `Dispatch ${boothItem}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

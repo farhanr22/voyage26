@@ -7,9 +7,39 @@
     <title>{{ booth_item }} Booth - Voyage'25</title>
     <link href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-icons.min.css') }}">
+    <script src="{{ url_for('static', filename='js/qr-scanner.umd.min.js') }}"></script>
     <style>
         body {
             background-color: #f8f9fa;
+        }
+
+        #qr-video-container {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            margin: auto;
+            border: 2px solid #eee;
+            background: repeating-radial-gradient(circle, #fff 0px, #eee 35px, #fff 70px);
+        }
+
+        #qr-video-container .scan-region-highlight-svg path {
+            stroke: white !important;
+        }
+
+        #qr-video-container .code-outline-highlight {
+            stroke: #53e168 !important;
+            stroke-width: 10 !important;
+            stroke-linecap: square !important;
+            stroke-linejoin: miter !important;
+        }
+
+        #qr-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -31,6 +61,32 @@
                                 placeholder="Enter your Operator ID">
                             <button class="btn btn-outline-secondary" type="button" id="userBtn">Verify ID</button>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <h5 class="card-header"><i class="bi bi-qr-code-scan me-2"></i>QR Scanner</h5>
+                    <div class="card-body text-center">
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <button id="start-camera" class="btn btn-outline-primary">
+                                <i class="bi bi-play-fill me-1"></i>Start
+                            </button>
+                            <button id="stop-camera" class="btn btn-outline-danger">
+                                <i class="bi bi-stop-fill me-1"></i>Stop
+                            </button>
+                            <button id="cycle-camera" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-repeat me-1"></i>Change
+                            </button>
+                        </div>
+
+                        <div id="qr-video-container" class="bg-dark">
+                            <video id="qr-video" class="w-100 h-100"></video>
+                        </div>
+                        <p id="scan-status" class="form-text mt-2 font-monospace">Camera is off.</p>
+
+                        <button id="capture-btn" class="btn btn-primary btn-lg w-100 mt-2" disabled>
+                            <i class="bi bi-upc-scan me-1"></i> Fetch Scanned ID
+                        </button>
                     </div>
                 </div>
 
@@ -57,6 +113,20 @@
     <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script>
         const boothItem = document.body.dataset.item;
+
+        // --- QR SCANNER VARIABLES (Add this new block) ---
+        const videoElem = document.getElementById('qr-video');
+        const startCameraButton = document.getElementById('start-camera');
+        const stopCameraButton = document.getElementById('stop-camera');
+        const cycleCameraButton = document.getElementById('cycle-camera');
+        const captureButton = document.getElementById('capture-btn');
+        const statusElem = document.getElementById('scan-status');
+        const studentIdInput = document.getElementById('qr'); // The input in the other card
+
+        let qrScanner;
+        let lastScannedResult = null;
+        let availableCameras = [];
+        let activeCameraIndex = 0;
 
         // Toast Notification Function
         function showToast(message, type = 'info') {
@@ -87,21 +157,37 @@
         // Event Listeners
         document.getElementById('userBtn').addEventListener('click', checkUsername);
         document.getElementById('regBtn').addEventListener('click', checkRegistration);
+        startCameraButton.addEventListener('click', startScanner);
+        stopCameraButton.addEventListener('click', stopScanner);
+        cycleCameraButton.addEventListener('click', cycleCamera);
+        captureButton.addEventListener('click', captureQrCode);
+
 
         async function checkUsername() {
             const username = document.getElementById('username').value;
-            const response = await fetch('/booth-admin/check-username', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username })
-            });
-            const data = await response.json();
-            if (data.valid) {
-                showToast('Operator ID is valid.', 'success');
-            } else {
-                showToast('Unrecognized Operator ID.', 'danger');
+            try {
+                const response = await fetchWithTimeout('/booth-admin/check-username', { // Use the helper
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+                const data = await response.json();
+                if (data.valid) {
+                    showToast('Operator ID is valid.', 'success');
+                } else {
+                    showToast('Unrecognized Operator ID.', 'danger');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showToast('The request timed out. Please check your network.', 'danger');
+                } else {
+                    showToast('A network error occurred. Please try again.', 'danger');
+                }
+                console.error("Fetch error:", error);
             }
         }
+
+
 
         async function checkRegistration() {
             const username = document.getElementById('username').value;
@@ -109,13 +195,24 @@
             const fragContainer = document.getElementById('frag-container');
             fragContainer.innerHTML = '<p class="text-center">Loading...</p>';
 
-            const response = await fetch('/booth-admin/check-reg', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, id: studentId, item: boothItem })
-            });
-            const data = await response.json();
-            fragContainer.innerHTML = data.fragment;
+            try {
+                const response = await fetchWithTimeout('/booth-admin/check-reg', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, id: studentId, item: boothItem })
+                });
+                const data = await response.json();
+                fragContainer.innerHTML = data.fragment;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    fragContainer.innerHTML = "<p class='alert alert-danger'>The request timed out. Please check your network and try again.</p>";
+                    showToast('Request timed out.', 'danger');
+                } else {
+                    fragContainer.innerHTML = "<p class='alert alert-danger'>A network error occurred. Please try again.</p>";
+                    showToast('Network error.', 'danger');
+                }
+                console.error("Fetch error:", error);
+            }
         }
 
         async function dispatchItem(button) {
@@ -124,21 +221,122 @@
             button.disabled = true;
             button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Dispatching...';
 
-            const response = await fetch('/booth-admin/dispatch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, id: studentId, item: boothItem })
-            });
-            const data = await response.json();
+            try {
+                const response = await fetchWithTimeout('/booth-admin/dispatch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, id: studentId, item: boothItem })
+                });
+                const data = await response.json();
 
-            if (data.success) {
-                showToast(data.message, 'success');
-                checkRegistration();
-            } else {
-                showToast(data.message, 'danger');
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    checkRegistration(); // Refresh the fragment
+                } else {
+                    showToast(data.message, 'danger');
+                    button.disabled = false;
+                    button.innerHTML = `<i class="bi bi-send-check me-1"></i> Dispatch ${boothItem}`;
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showToast('The dispatch request timed out. Please try again.', 'danger');
+                } else {
+                    showToast('A network error occurred while dispatching.', 'danger');
+                }
+                console.error("Fetch error:", error);
                 button.disabled = false;
-                button.innerHTML = `Dispatch ${boothItem}`;
+                button.innerHTML = `<i class="bi bi-send-check me-1"></i> Dispatch ${boothItem}`;
             }
+        }
+
+        // === QR SCANNER logic ===
+
+        // This function is called every time a QR code is successfully scanned
+        const onScanSuccess = result => {
+            lastScannedResult = result.data;
+            statusElem.textContent = `Scanned: ${result.data}`;
+            captureButton.disabled = false; // Enable the capture button
+            captureButton.classList.remove('btn-primary');
+            captureButton.classList.add('btn-success');
+        };
+
+        // Initialize the scanner object
+        qrScanner = new QrScanner(videoElem, onScanSuccess, {
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+        });
+
+        function startScanner() {
+            statusElem.textContent = 'Requesting camera access...';
+
+            // .start() method automatically asks for permission, resolves when granted
+            qrScanner.start().then(() => {
+                statusElem.textContent = 'Scanning...';
+
+                QrScanner.listCameras(true).then(cameras => {
+                    availableCameras = cameras;
+                    // disable the 'Change' button if there's only one camera
+                    cycleCameraButton.disabled = cameras.length < 2;
+                });
+
+                // reset the state for a new scan
+                lastScannedResult = null;
+                captureButton.disabled = true;
+                captureButton.classList.remove('btn-success');
+                captureButton.classList.add('btn-primary');
+
+            }).catch(err => {
+                // This handles both "camera not found" and "permission denied" errors
+                console.error(err);
+                statusElem.textContent = 'Camera start failed.';
+
+                if (String(err).includes('NotAllowedError')) {
+                    showToast('Camera permission was denied.', 'danger');
+                } else {
+                    showToast(`Could not start camera: ${err}`, 'danger');
+                }
+            });
+        }
+
+        function stopScanner() {
+            qrScanner.stop();
+            statusElem.textContent = 'Camera stopped.';
+        }
+
+        function cycleCamera() {
+            if (availableCameras.length > 1) {
+                activeCameraIndex = (activeCameraIndex + 1) % availableCameras.length;
+                const nextCameraId = availableCameras[activeCameraIndex].id;
+                qrScanner.setCamera(nextCameraId)
+                    .then(() => statusElem.textContent = `Switched to camera: ${availableCameras[activeCameraIndex].label}`)
+                    .catch(err => statusElem.textContent = `Failed to switch camera: ${err}`);
+            } else {
+                showToast('No other cameras found.', 'info');
+            }
+        }
+
+        function captureQrCode() {
+            if (lastScannedResult) {
+                studentIdInput.value = lastScannedResult;
+                // showToast('Student ID captured!', 'success');
+                document.getElementById('regBtn').click();
+            } else {
+                showToast('No QR code has been scanned yet.', 'warning');
+            }
+        }
+
+        // Fetch and abort with 5 second timeout
+        async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+
+            clearTimeout(id);
+            return response;
         }
     </script>
 </body>

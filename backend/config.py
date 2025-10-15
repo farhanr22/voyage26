@@ -12,6 +12,10 @@ class Config:
     SECRET_KEY = os.environ['SECRET_KEY']
     USE_SQLITE = os.environ['USE_SQLITE'] == "True"
 
+    HCAPTCHA_SITE_KEY = os.environ.get('HCAPTCHA_SITE_KEY') or ''
+    HCAPTCHA_SECRET_KEY = os.environ.get('HCAPTCHA_SECRET_KEY') or ''
+    HCAPTCHA_ENABLED = True if os.environ.get('HCAPTCHA_ENABLED') == "True" else False
+
     if USE_SQLITE:
         DB_NAME = os.environ['SQLITE_FILE']
         DB_URL = f"sqlite:///{os.path.join(basedir, DB_NAME)}"

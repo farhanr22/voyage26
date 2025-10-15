@@ -19,6 +19,13 @@
         </button>
     </div>
 
+    {% if hcaptcha %}
+        <label>Captcha</label>
+        <div class="mt-1" style="min-height: 76px;">
+            {{ hcaptcha }}
+        </div>
+    {% endif %}
+
     {{ form.submit(class="btn btn-primary w-100 mt-2") }}
 </form>
 {% endblock %}

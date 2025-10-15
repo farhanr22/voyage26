@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_wtf import FlaskForm
@@ -6,6 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
 
 from ..models import Admins
+from ..extensions import hcaptcha
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -42,6 +43,12 @@ class ChangePasswordForm(FlaskForm):
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+
+    # Captcha validation done separately from WTForms
+    if request.method == 'POST':
+        if not hcaptcha.verify():
+            flash('CAPTCHA verification failed. Please try again.', 'danger')
+            return redirect(url_for('auth.login'))
 
     if form.validate_on_submit():
         username = form.username.data

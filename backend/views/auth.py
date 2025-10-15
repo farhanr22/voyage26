@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
 
 from ..models import Admins
-from ..extensions import hcaptcha
+from ..extensions import hcaptcha, limiter
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -39,8 +39,8 @@ class ChangePasswordForm(FlaskForm):
     )
     submit = SubmitField("Change Password")
 
-
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("6 per minute", methods=['POST'])
 def login():
     form = LoginForm()
 

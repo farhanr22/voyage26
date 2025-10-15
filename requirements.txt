@@ -4,3 +4,4 @@ python-dotenv
 flask-login
 Flask-WTF
 flask-hcaptcha
+Flask-Limiter

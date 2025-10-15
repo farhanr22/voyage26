@@ -6,7 +6,7 @@ from playhouse.db_url import connect
 from .config import Config
 from . import models
 from .models import db_proxy, Admins
-from .extensions import login_manager, hcaptcha
+from .extensions import login_manager, hcaptcha, limiter
 
 
 def create_app(config_class=Config):
@@ -19,6 +19,7 @@ def create_app(config_class=Config):
 
     login_manager.init_app(app)
     hcaptcha.init_app(app)
+    limiter.init_app(app)
 
     from .views.auth import auth_bp
     app.register_blueprint(auth_bp)

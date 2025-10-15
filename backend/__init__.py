@@ -36,6 +36,10 @@ def create_app(config_class=Config):
     from .views.booth import booth_bp
     app.register_blueprint(booth_bp)
 
+    from .views.api import api_bp
+    app.register_blueprint(api_bp)
+
+
     from . import cli
     cli.register_commands(app)
     

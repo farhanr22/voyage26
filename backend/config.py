@@ -10,6 +10,7 @@ class Config:
     
     DEBUG = os.environ['FLASK_DEBUG'] == "1"
     SECRET_KEY = os.environ['SECRET_KEY']
+    API_PASSWORD = os.environ['API_PASSWORD']
     USE_SQLITE = os.environ['USE_SQLITE'] == "True"
 
     HCAPTCHA_SITE_KEY = os.environ.get('HCAPTCHA_SITE_KEY') or ''

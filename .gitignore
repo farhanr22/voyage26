@@ -2,3 +2,10 @@
 /venv/
 __pycache__/
 *.db
+
+    
+# Ignore all contents of the public build directory except .gitkeep
+public/*
+!public/.gitkeep
+
+  

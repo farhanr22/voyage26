@@ -4,8 +4,8 @@ import peewee as pw
 from flask import Blueprint, render_template, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms import IntegerField, SubmitField, StringField
+from wtforms.validators import DataRequired, NumberRange, Optional
 
 from ..models import Reg_Data, CR_Payments, CR_Profiles
 from ..utils import generate_unique_id, update_timestamp
@@ -17,11 +17,7 @@ class VerificationForm(FlaskForm):
     """Form for verifying or rejecting a registration."""
 
     amount = IntegerField(
-        "Verified Amount",
-        validators=[
-            DataRequired(),
-            NumberRange(min=1, message="Amount must be positive."),
-        ],
+        "Verified Amount", validators=[Optional()]
     )
     verify = SubmitField("Verify")
     reject = SubmitField("Reject")
@@ -147,8 +143,8 @@ def process_registration(subid):
             paid_amount = form.amount.data
             shirt_amount = current_app.config["AMOUNT_SHIRT"]
 
-            if paid_amount <= 0 or paid_amount > shirt_amount:
-                flash("Paid amount is out of bounds.", "danger")
+            if not paid_amount or paid_amount <= 0 or paid_amount > shirt_amount:
+                flash("Paid amount is out of bounds or invalid.", "danger")
                 return redirect(url_for("registrations.view_registration", subid=subid))
 
             # Get a new, unique ID for the verified profile

@@ -3,6 +3,8 @@ from werkzeug.security import generate_password_hash
 from flask.cli import with_appcontext
 import click
 from .config import Config
+from pathlib import Path
+import csv
 
 from .models import (
     db_proxy,
@@ -123,6 +125,63 @@ def register_commands(app):
         except Exception as e:
             print(f"❌ Error updating password: {e}")
 
+
+    @app.cli.command("load-crs")
+    @with_appcontext
+    def load_crs():
+        """
+        Loads CR profiles from a 'cr.csv' file located in the project root.
+        """
+
+        # Locate the CSV file
+        # Use pathlib to find the project root, two levels up from this file
+        project_root = Path(__file__).resolve().parent.parent
+        csv_file_path = project_root / "cr.csv"
+
+        # Handle missing file error
+        if not csv_file_path.exists():
+            print("❌ ERROR: 'cr.csv' not found.")
+            print(f"   Please place the file in the project root directory:")
+            print(f"   {project_root}")
+            return
+
+        # Ask for confirmation before proceeding
+        if not click.confirm(
+            f"Found 'cr.csv'. Do you want to load its contents into the database?",
+            default=True,
+        ):
+            print("Operation cancelled.")
+            return
+
+        print("Reading cr.csv...")
+        try:
+            with open(csv_file_path, newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                cr_profiles_to_load = []
+
+                for row in reader:
+                    cr_profiles_to_load.append(
+                        {
+                            "CRID": row["CR-ID"],
+                            "Name": row["CR-Name"],
+                            "Phone": row["Mobile"],
+                            "Batch": row["Batch"],
+                        }
+                    )
+            if not cr_profiles_to_load:
+                print("⚠️ Warning: 'cr.csv' is empty. No data was loaded.")
+                return
+
+            # Insert data into the database
+            with db_proxy.atomic():
+                CR_Profiles.insert_many(cr_profiles_to_load).execute()
+
+            print(f"✅ Successfully loaded {len(cr_profiles_to_load)} CR profiles.")
+
+        except Exception as e:
+            print(f"❌ An error occurred while processing the file: {e}")
+
+
     @app.cli.command("seed-data")
     @with_appcontext
     def seed_data():
@@ -207,7 +266,7 @@ def register_commands(app):
         new_regs = []
         new_cr_pays = []
 
-        # GENERATE MAIN CHUNK OF PROFILES 
+        # GENERATE MAIN CHUNK OF PROFILES
 
         print(f"Generating {TOTAL_PROFILES} standard profiles...")
 

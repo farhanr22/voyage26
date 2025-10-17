@@ -12,8 +12,6 @@ def get_student_data():
     """
 
     data = request.get_json()
-    print('current password: ', current_app.config.get("API_PASSWORD"))
-    print("recevied paswrod : ", data.get("password"))
 
     # Check for the API password
     if not data or data.get("password") != current_app.config.get("API_PASSWORD"):

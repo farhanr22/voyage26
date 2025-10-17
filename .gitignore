@@ -8,4 +8,7 @@ __pycache__/
 public/*
 !public/.gitkeep
 
-  
+# Node.js whatsapp worker
+/whatsapp-worker/node_modules
+/whatsapp-worker/.wwebjs_auth/
+/whatsapp-worker/.wwebjs_cache/

@@ -55,3 +55,90 @@ def get_student_data():
         )
 
     return jsonify({"data": students_list})
+
+
+# === NOTIFICATION WORKER ENDPOINTS ==
+
+@api_bp.route('/notifications/next', methods=['POST'])
+def get_next_notification():
+    """
+    Finds the next pending notification and returns its data.
+    """
+
+    data = request.get_json()
+    
+    # Check API password
+    if not data or data.get("password") != current_app.config.get("API_PASSWORD"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    # Query for one pending notification
+    pending_profile = (
+        Reg_Data.select(Reg_Data.Name, Reg_Data.Phone, Reg_Data.StudentID)
+        .where(
+            (Reg_Data.Status == "Verified") &
+            (Reg_Data.NotificationStatus == "Pending")
+        )
+        .first()
+    )
+    
+    # Get the total count of all pending notifications
+    pending_count = Reg_Data.select().where(
+        (Reg_Data.Status == "Verified") &
+        (Reg_Data.NotificationStatus == "Pending")
+    ).count()
+
+    # Prepare the response
+    if pending_profile:
+        # If a profile was found, return its data
+        profile_data = {
+            "name": pending_profile.Name,
+            "phone": pending_profile.Phone,
+            "student_id": pending_profile.StudentID
+        }
+        return jsonify({
+            "pending_count": pending_count,
+            "data": profile_data
+        })
+    else:
+        # else return an empty data object
+        return jsonify({
+            "pending_count": 0,
+            "data": None
+        })
+
+@api_bp.route('/notifications/confirm', methods=['POST'])
+def confirm_notification_sent():
+    """
+    Confirms that a notification has been sent and updates the student's status.
+    """
+
+    data = request.get_json()
+    
+    # Check API password
+    if not data or data.get("password") != current_app.config.get("API_PASSWORD"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    student_id = data.get("student_id")
+    if not student_id:
+        return jsonify({"error": "student_id is required"}), 400
+
+    # Find the student and update their status
+    try:
+        profile_to_update = Reg_Data.get(Reg_Data.StudentID == student_id)
+        
+        if profile_to_update.NotificationStatus == "Pending":
+            profile_to_update.NotificationStatus = "Done"
+            profile_to_update.save()
+            
+            return jsonify({
+                "status": "success",
+                "message": f"Notification for {student_id} confirmed."
+            })
+        else:
+            return jsonify({
+                "status": "noop", # "No Operation"
+                "message": f"Notification for {student_id} was already marked as Done."
+            })
+
+    except Reg_Data.DoesNotExist:
+        return jsonify({"error": f"Student with ID {student_id} not found."}), 404

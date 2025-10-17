@@ -1,5 +1,3 @@
-# backend/views/registrations.py
-
 import peewee as pw
 from flask import Blueprint, render_template, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user

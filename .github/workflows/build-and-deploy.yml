@@ -1,0 +1,56 @@
+name: Build and Deploy Static Profiles
+
+# Triggers :
+# This workflow will run when:
+# 1. It receives a 'repository_dispatch' event with the type 'update-profiles'.
+# 2. It is manually triggered from the GitHub Actions UI ('workflow_dispatch').
+on:
+  repository_dispatch:
+    types: [update-profiles]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Grant write permission to repo contents
+    permissions:
+      contents: write
+    
+    steps:
+      # Checkout Code
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Install Build Dependencies
+      - name: Install build dependencies
+        run: pip install -r action_requirements.txt
+
+      # Generate Static Pages
+      - name: Generate static profile pages
+        run: python scripts/build_profiles.py
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          API_PASSWORD: ${{ secrets.API_PASSWORD }}
+
+      # Deploy to 'deploy' Branch
+      # Takes the contents of the 'public' directory and pushes them
+      # to the 'deploy' branch, overwriting its history.
+      - name: Deploy to deploy branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: deploy
+          force_orphan: true # Creates a single-commit history on the deploy branch
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: "chore(deploy): Auto-generate and deploy static profiles"

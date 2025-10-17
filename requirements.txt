@@ -5,3 +5,4 @@ flask-login
 Flask-WTF
 flask-hcaptcha
 Flask-Limiter
+gspread

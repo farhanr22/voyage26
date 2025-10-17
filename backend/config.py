@@ -29,9 +29,18 @@ class Config:
 
 
 
-    # ---- APP CONFIG ----
+    # APP CONFIG
     TIMEZONE = ZoneInfo('Asia/Kolkata') 
     
     AMOUNT_SHIRT = 1100
     AMOUNT_NOSHIRT = 900
     BOOTHS = ["T-SHIRT", "TIFFIN"]
+
+    # Variables for Operational Commands
+    GH_OWNER = os.environ.get("GH_OWNER")
+    GH_REPO = os.environ.get("GH_REPO")
+    GH_PAT = os.environ.get("GH_PAT")
+
+    GCP_SA_KEY_B64=os.environ.get("GCP_SA_KEY_B64")
+    REG_SHEET_KEY=os.environ.get("REG_SHEET_KEY")
+    CR_PAY_SHEET_KEY=os.environ.get("CR_PAY_SHEET_KEY")

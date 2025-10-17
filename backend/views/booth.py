@@ -8,7 +8,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 from ..models import Booth_Operators, ItemsTaken, Reg_Data
-from ..utils import get_current_timestamp_str
+from ..utils import get_current_timestamp_str, update_timestamp
 
 # === Forms used in this blueprint ===
 
@@ -283,6 +283,9 @@ def dispatch_item():
             Item=item,
             TakenAt=get_current_timestamp_str(),  # Use our new timestamp function
         )
+        
+        update_timestamp() # To update student profile page
+
         return jsonify(
             authorized=True,
             success=True,

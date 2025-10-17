@@ -9,6 +9,7 @@ import gspread
 from .models import db_proxy, UpdateMetadata, Reg_Data, CR_Payments
 from .utils import update_timestamp
 
+
 def register_ops_commands(app):
     """Register operational CLI commands."""
 
@@ -31,16 +32,16 @@ def register_ops_commands(app):
             return
 
         try:
-            decoded_key = base64.b64decode(gcp_sa_key_b64).decode('utf-8')
+            decoded_key = base64.b64decode(gcp_sa_key_b64).decode("utf-8")
             credentials = json.loads(decoded_key)
         except Exception as e:
             print(f"❌ FATAL: Could not decode GCP service account key. Error: {e}")
             return
-            
+
         # Authenticate and Fetch
         try:
             gc = gspread.service_account_from_dict(credentials)
-            
+
             # Fetch Registration Data
             reg_sheet = gc.open_by_key(reg_sheet_key)
             reg_records = reg_sheet.sheet1.get_all_records()
@@ -61,15 +62,19 @@ def register_ops_commands(app):
         try:
             with db_proxy.atomic():
                 # Get existing IDs for efficient checking
-                existing_reg_ids = {rec.SubID for rec in Reg_Data.select(Reg_Data.SubID)}
-                existing_cr_pay_ids = {rec.SubID for rec in CR_Payments.select(CR_Payments.SubID)}
+                existing_reg_ids = {
+                    rec.SubID for rec in Reg_Data.select(Reg_Data.SubID)
+                }
+                existing_cr_pay_ids = {
+                    rec.SubID for rec in CR_Payments.select(CR_Payments.SubID)
+                }
 
                 # Process Registrations
                 for record in reg_records:
                     if record.get("Submission ID") not in existing_reg_ids:
                         tshirt_interest = record.get("TShirtInterest") == "Yes"
                         payable = amount_shirt if tshirt_interest else amount_noshirt
-                        
+
                         Reg_Data.create(
                             SubID=record["Submission ID"],
                             SubAt=record["Submitted at"],
@@ -79,7 +84,9 @@ def register_ops_commands(app):
                             FoodPref=record["FoodPref"],
                             TShirtInt=tshirt_interest,
                             TShirtSize=record.get("TShirtSize") or None,
-                            PaymentMethod="CR" if "CR" in record["PaymentMethod"] else "Online",
+                            PaymentMethod=(
+                                "CR" if "CR" in record["PaymentMethod"] else "Online"
+                            ),
                             PaymentScreenshot=record.get("PaymentScreenshot") or None,
                             Payable=payable,
                         )
@@ -98,7 +105,9 @@ def register_ops_commands(app):
                             Amount=record["Amount"],
                         )
                         new_records_added = True
-                        print(f"  -> New CR Payment: {record['Name']} (Rs. {record['Amount']})")
+                        print(
+                            f"  -> New CR Payment: {record['Name']} (Rs. {record['Amount']})"
+                        )
 
         except Exception as e:
             print(f"❌ An error occurred during database insertion: {e}")
@@ -108,7 +117,7 @@ def register_ops_commands(app):
             print("✅ New data ingested. Timestamp updated.")
         else:
             print("No new data found.")
-        
+
         print("[OPS] Data Ingestion Task Finished")
 
     @app.cli.command("trigger-rebuild")
@@ -120,8 +129,11 @@ def register_ops_commands(app):
 
         # Use get_or_none in case the table is empty
         metadata = UpdateMetadata.get_or_none(id=1)
-        
-        if metadata and metadata.LastModified > metadata.LastUpdated:
+
+        # During first run, if there's no value of LastUpdated, then short circuit and trigger a deploy
+        if metadata and (
+            not metadata.LastUpdated or metadata.LastModified > metadata.LastUpdated
+        ):
             print("Changes detected. Triggering rebuild workflow...")
 
             owner = current_app.config.get("GH_OWNER")
@@ -140,8 +152,10 @@ def register_ops_commands(app):
                     "X-GitHub-Api-Version": "2022-11-28",
                 }
                 payload = {"event_type": "update-profiles"}
-                
-                response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+
+                response = requests.post(
+                    api_url, json=payload, headers=headers, timeout=10
+                )
                 response.raise_for_status()
 
                 metadata.LastUpdated = datetime.now()

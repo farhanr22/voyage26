@@ -15,16 +15,23 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     if not app.debug and not app.testing:
-        if not app.logger.handlers: # Check if handlers have already been added
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                '[%(asctime)s] %(levelname)s in %(module)s.%(funcName)s: %(message)s'
-            )
-            handler.setFormatter(formatter)
-            app.logger.addHandler(handler)
-        
+        # Remove any handlers that might have added
+        while app.logger.handlers:
+            app.logger.removeHandler(app.logger.handlers[0])
+
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '[%(asctime)s] %(levelname)s in %(module)s.%(funcName)s: %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
         app.logger.setLevel(logging.INFO)
-        app.logger.info('Voyage Admin startup')
+        
+        # Stop the logger from propagating messages to the root logger to prevent duplicates
+        app.logger.propagate = False
+        
+        app.logger.info('Voyage Admin application startup')
 
     # Initialize DB connection
     database_connection = connect(app.config["DB_URL"])

@@ -1,0 +1,22 @@
+# .dockerignore
+
+# Git files
+.git/
+.gitignore
+
+# Python cache and virtual environment
+__pycache__/
+*.pyc
+venv/
+
+public/
+
+
+# Local environment files and databases
+.env
+*.db
+
+# Node.js whatsapp worker
+/whatsapp-worker/node_modules
+/whatsapp-worker/.wwebjs_auth/
+/whatsapp-worker/.wwebjs_cache/

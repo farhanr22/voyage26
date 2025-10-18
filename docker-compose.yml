@@ -1,0 +1,21 @@
+# docker-compose.yml for local development and execution.
+services:
+  web:
+    build: .
+    container_name: voyage-backend-app
+    
+    # Load environment vars from the .env file in the project root
+    env_file:
+      - .env
+      
+    # Set the FLASK_APP variable for the Flask CLI to work correctly
+    environment:
+      - FLASK_APP=backend.wsgi:app
+      
+    # Linux specific setup : Use host's network stack to allow the
+    # container to connect to a database running on localhost.
+    # You may need to use a different networking setup for Windows/Mac.
+    network_mode: host
+    
+    # Automatically restart the container unless it is explicitly stopped.
+    restart: unless-stopped

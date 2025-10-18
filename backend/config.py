@@ -33,7 +33,6 @@ class Config:
 
     else:
         DB_URL = os.environ["DATABASE_URI"]
-        print(f"Started up using DATABASE_URI")
         logging.info("App configured to use Production DATABASE_URI.")
 
     # APP CONFIG

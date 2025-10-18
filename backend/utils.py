@@ -43,7 +43,7 @@ def update_timestamp():
         metadata.LastModified = datetime.now()
         metadata.save()
     except Exception as e:
-        print(f"Error updating timestamp: {e}")
+        current_app.logger.warning(f"Error updating timestamp : '{e}'.")
 
 
 def get_current_timestamp_str() -> str:

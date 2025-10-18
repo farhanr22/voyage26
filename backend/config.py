@@ -1,9 +1,11 @@
 import os
+import logging
 from dotenv import load_dotenv
 from zoneinfo import ZoneInfo
 
-basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
 
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
@@ -22,11 +24,12 @@ class Config:
     if USE_SQLITE:
         DB_NAME = os.environ['SQLITE_FILE']
         DB_URL = f"sqlite:///{os.path.join(basedir, DB_NAME)}"
-        print(f"Started up using SQLITE : {DB_URL}")
+        logging.info(f"App configured to use SQLite: {DB_URL}")
+
     else :
         DB_URL= os.environ['DATABASE_URI']
         print(f"Started up using DATABASE_URI")
-
+        logging.info("App configured to use Production DATABASE_URI.")
 
 
     # APP CONFIG

@@ -1,4 +1,5 @@
-# __init__.py
+import logging
+
 from flask import Flask, session
 import peewee
 from playhouse.db_url import connect
@@ -12,6 +13,18 @@ from .extensions import login_manager, hcaptcha, limiter
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    if not app.debug and not app.testing:
+        if not app.logger.handlers: # Check if handlers have already been added
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                '[%(asctime)s] %(levelname)s in %(module)s.%(funcName)s: %(message)s'
+            )
+            handler.setFormatter(formatter)
+            app.logger.addHandler(handler)
+        
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Voyage Admin startup')
 
     # Initialize DB connection
     database_connection = connect(app.config["DB_URL"])

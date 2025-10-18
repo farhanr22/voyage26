@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, flash, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_wtf import FlaskForm
@@ -68,6 +68,8 @@ def login():
 
                 flash("Logged in successfully!", "success")
 
+                current_app.logger.info(f"Admin user '{admin.username}' logged in successfully.")
+
                 return redirect(url_for("main.dashboard"))
             else:
                 flash(
@@ -98,7 +100,9 @@ def change_password():
 
         # Check if the current password is correct
         if not check_password_hash(current_user.passhash, form.current_password.data):
+            current_app.logger.warning(f"Failed password change attempt for user '{current_user.username}'.")
             flash("Your current password is incorrect. Please try again.", "danger")
+            
         else:
             # Hash the new password
             new_passhash = generate_password_hash(form.new_password.data)
@@ -112,6 +116,8 @@ def change_password():
             session["_session_version"] = current_user.session_version
 
             flash("Your password has been changed successfully!", "success")
+            current_app.logger.info(f"Admin user '{current_user.username}' changed their password.")
+
             return redirect(url_for("main.dashboard"))
 
     #  Handle validation failures with flash messages

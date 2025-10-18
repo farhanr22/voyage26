@@ -169,7 +169,9 @@ def verify_installment():
             f"Updated payment for {match['RegDataName']} to Rs. {new_amount}.",
             "success",
         )
+        current_app.logger.info(f"Admin '{current_user.username}' verified installment for '{match['RegDataName']}' (New total: {new_amount}).")
     else:
         flash("An error occurred. Please try again.", "danger")
+
 
     return redirect(url_for("cr_payments.dashboard"))

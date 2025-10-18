@@ -1,7 +1,14 @@
-# backend/views/booth.py
-
 import peewee as pw
-from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, current_app
+from flask import (
+    Blueprint,
+    render_template,
+    flash,
+    redirect,
+    url_for,
+    request,
+    jsonify,
+    current_app,
+)
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
@@ -68,6 +75,10 @@ def dashboard():
                     AddedBy=current_user.username,
                 )
                 flash(f"Booth operator '{username}' added successfully!", "success")
+                current_app.logger.info(
+                    f"Admin '{current_user.username}' added new booth operator '{username}'."
+                )
+
             except pw.IntegrityError as e:
                 flash("A database error occurred.", "danger")
 
@@ -133,8 +144,14 @@ def remove_operator(username):
             operator.RemovedBy = current_user.username
             operator.save()
             flash(f"Operator '{username}' has been removed.", "success")
+            current_app.logger.info(
+                f"Admin '{current_user.username}' removed booth operator '{username}'."
+            )
         else:
             flash("Operator not found or already removed.", "warning")
+            current_app.logger.warning(
+                f"Admin '{current_user.username}' tried to remove operator '{username}'."
+            )
     else:
         flash("Invalid request.", "danger")
 
@@ -236,7 +253,7 @@ def check_registration():
 @booth_bp.route("/dispatch", methods=["POST"])
 def dispatch_item():
     """API endpoint to record the dispatch of an item."""
-    
+
     data = request.get_json()
     username = data.get("username")
     student_id = data.get("id", "").upper()
@@ -283,8 +300,12 @@ def dispatch_item():
             Item=item,
             TakenAt=get_current_timestamp_str(),  # Use our new timestamp function
         )
-        
-        update_timestamp() # To update student profile page
+
+        update_timestamp()  # To update student profile page
+
+        current_app.logger.info(
+            f"Operator '{username}' dispatched item '{item}' to student '{student_id}'."
+        )
 
         return jsonify(
             authorized=True,
@@ -292,7 +313,9 @@ def dispatch_item():
             message=f"Item '{item}' successfully dispatched!",
         )
     except Exception as e:
-        print(f"--- DISPATCH ERROR ---: {e}")
+        current_app.logger.error(
+            f"ERROR during dispatch by '{username}' for student '{student_id}': {e}"
+        )
         return jsonify(
             authorized=True, success=False, message="A database error occurred."
         )

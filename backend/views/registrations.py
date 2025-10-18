@@ -135,6 +135,7 @@ def process_registration(subid):
             profile.Status = "Rejected"
             profile.VerifiedBy = current_user.username
             profile.save()
+            current_app.logger.info(f"Admin '{current_user.username}' REJECTED registration for '{profile.Name}' ({subid}).")
             flash(f"Rejected entry for {profile.Name}.", "success")
 
         elif form.verify.data:
@@ -160,6 +161,7 @@ def process_registration(subid):
             ).execute()
 
             update_timestamp()
+            current_app.logger.info(f"Admin '{current_user.username}' VERIFIED registration for '{profile.Name}' ({subid}) with amount {paid_amount}.")
             flash(f"Verified {profile.Name} with amount: Rs. {paid_amount}", "success")
     else:
         # If form validation fails, flash the errors
@@ -184,10 +186,12 @@ def unreject(subid):
         )
         if not profile:
             flash("Entry doesn't exist or was not rejected.", "danger")
+            current_app.logger.warning(f"Admin '{current_user.username}' tried to unreject nonexistent profile ({subid}).")
         else:
             profile.Status = "Pending"
             profile.VerifiedBy = None
             profile.save()
+            current_app.logger.info(f"Admin '{current_user.username}' UNREJECTED registration for '{profile.Name}' ({subid}).")
             flash(f"Unrejected entry for {profile.Name}.", "success")
     else:
         flash("Invalid request.", "danger")

@@ -172,6 +172,93 @@ For a quick setup without Docker, you can use a local SQLite database.
 
 </details>
 
+    
+<details>
+
+<summary><h3>Automation & CI/CD Configuration</h3></summary>
+
+This project's automation pipelines are implemented as Flask CLI commands, designed to be run periodically by a scheduler like `cron`. They are divided into two main parts: data ingestion and frontend deployment. Here’s how to configure them:
+
+---
+
+#### Data Ingestion Pipeline
+This pipeline, run by the `flask ingest-data` command, syncs new records from Google Sheets to the database. For this to function, you'll need to set the following environment variables in `.env`:
+
+*   `GCP_SA_KEY_B64`: The Base64 encoded JSON content of your Google Cloud Service Account key file. This is required for Google Sheets API access.
+*   `REG_SHEET_KEY`: The unique key/ID of the Google Sheet containing student registration data.
+*   `CR_PAY_SHEET_KEY`: The unique key/ID of the Google Sheet containing CR payment data.
+
+---
+
+#### Frontend Deployment Pipeline
+This is a multi-stage process where a local script triggers a remote CI/CD job.
+
+**1. Trigger Script Configuration**
+
+The `flask trigger-rebuild` command checks for database updates and sends a webhook to GitHub. You'll need to set the follwing variables in `.env`:
+
+*   `GH_OWNER`: Your GitHub username or organization name.
+*   `GH_REPO`: The name of the repository where the Action lives.
+*   `GH_PAT`: A GitHub Personal Access Token with `repo` and `workflow` scopes, required to trigger the `repository_dispatch` event.
+
+**2. GitHub Actions Configuration**
+
+The GitHub Action (`.github/workflows/build-and-deploy.yml`) is triggered by the script above. It calls the backend API to get student data, builds the static pages, and pushes them to the `deploy` branch. For the Action to run successfully, the following secrets must be set in your GitHub repository under **`Settings > Secrets and variables > Actions`**:
+
+| Secret Name | Description |
+|---|---|
+| `API_URL` | The public-facing URL of your running backend's API endpoint (e.g., `https://your-app.com/api/student-data`). |
+| `API_PASSWORD` | The password required to authenticate with the backend API. |
+
+You'll also need to set the `API_PASSWORD` variable in `.env` on the server to the same value as the Actions Secret.
+
+**3. Netlify Configuration**
+
+Finally, for the profile pages to be served, you'll need to have a Netlify site set up. The configuration is minimal:
+
+*   Connect the Netlify site to your GitHub repository.
+*   Set the **Production branch** to `deploy`.
+*   Leave the **Build command** and **Publish directory** empty on Netlify, as the build process is handled entirely by the GitHub Action.
+
+</details>
+
+<details>
+
+<summary><h3>Setting Up the WhatsApp Notification Worker</h3></summary>
+
+The system includes a decoupled, standalone worker script built with `whatsapp-web.js` to send automated confirmation messages. It is intended to be run on a separate, dedicated machine (e.g., a laptop) with a linked WhatsApp account.
+
+**1. Navigate to the Worker Directory**
+```bash
+cd whatsapp-worker
+```
+
+**2. Install Dependencies**
+```bash
+npm install
+```
+
+**3. Run the Worker**
+```bash
+node index.js
+```
+
+On startup, the script will interactively prompt you for three pieces of information:
+*   **API Base URL:** The root URL of the running backend server (e.g., `https://your-app.com`).
+*   **Profile Pages Base URL:** The root URL where the static profile pages are hosted (e.g., `https://your-event.netlify.app`).
+*   **API Password:** The secret password to authenticate with the backend API (same value as `API_PASSWORD` on the server `.env` file).
+
+**First-Time Authentication:**
+On the very first run, a QR code will be displayed in the terminal, which needs to be scanned by a phone that has the WhatsApp account from which the messages are to be sent. After a successful scan, the script will save the credentials and you will not need to scan the QR code again on subsequent runs.
+
+Once authenticated, the worker will begin its loop, polling the backend for new users to notify.
+
+**Customization:**
+The message template sent to users is hardcoded inside `whatsapp-worker/index.js` and can be easily customized to fit your needs.
+
+</details>
+
+
 ## Future Improvements
 
 - **Implement Database Migrations:** Integrate a tool like `peewee-db-evolve` to manage schema changes programmatically.

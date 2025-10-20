@@ -264,3 +264,8 @@ The message template sent to users is hardcoded inside `whatsapp-worker/index.js
 - **Implement Database Migrations:** Integrate a tool like `peewee-db-evolve` to manage schema changes programmatically.
 - **Rate Limiting outside the Application:** Move the rate-limiting logic to a reverse proxy for better performance.
 - **Comprehensive Test Suite:** Add unit and integration tests to improve  reliability and enable safer refactoring.
+
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

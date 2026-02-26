@@ -1,8 +1,8 @@
 .env
-/venv/
+venv/
 __pycache__/
 *.db
-
+cr.csv
     
 # Ignore all contents of the public build directory except .gitkeep
 public/*

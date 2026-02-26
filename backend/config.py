@@ -38,8 +38,8 @@ class Config:
     # APP CONFIG
     TIMEZONE = ZoneInfo("Asia/Kolkata")
 
-    AMOUNT_SHIRT = 1100
-    AMOUNT_NOSHIRT = 900
+    AMOUNT_SHIRT = 1200
+    AMOUNT_NOSHIRT = 1000
     BOOTHS = ["T-SHIRT", "TIFFIN"]
 
     # Variables for Operational Commands
@@ -47,6 +47,7 @@ class Config:
     GH_REPO = os.environ.get("GH_REPO")
     GH_PAT = os.environ.get("GH_PAT")
 
-    GCP_SA_KEY_B64 = os.environ.get("GCP_SA_KEY_B64")
-    REG_SHEET_KEY = os.environ.get("REG_SHEET_KEY")
-    CR_PAY_SHEET_KEY = os.environ.get("CR_PAY_SHEET_KEY")
+    # Tally API Configuration
+    TALLY_API_KEY = os.environ.get("TALLY_API_KEY")
+    TALLY_REGISTRATION_FORM_ID = os.environ.get("TALLY_REGISTRATION_FORM_ID")
+    TALLY_CR_FORM_ID = os.environ.get("TALLY_CR_FORM_ID")

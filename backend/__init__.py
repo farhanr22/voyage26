@@ -63,8 +63,8 @@ def create_app(config_class=Config):
     from . import cli
     cli.register_commands(app)
 
-    from . import ops
-    ops.register_ops_commands(app)
+    from .ops import register_ops_commands
+    register_ops_commands(app)
     
     
     from . import template_filters

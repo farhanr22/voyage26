@@ -42,9 +42,9 @@ The system primarily features an admin panel and a live booth operator page (sho
 
 When I was entrusted to manage the fund collection for our departmental fest (Voyage 2k25), I quickly realized there were several logistical obstacles — which earlier processes failed to address. Registrations were often collected through informal lists from Class Representatives, and payments were tracked and reconciled manually. This often caused inefficiencies and confusion, especially when it came to the on-site distribution of items like T-shirts and meal packets.
 
-The first step towards automation was introducing structured data collection using multi-step **[Tally.so](https://tally.so)** forms for both Attendees and Class Representatives, which were integrated with **Google Sheets**. While this consolidated the raw registration information and payment proofs into a couple of Sheets, a centralized application was still needed for admins to **verify registrations against CR payments**, **validate payment screenshots**, and provide a **booth service for dispatching items**.
+The first step towards automation was introducing structured data collection using **[Tally.so](https://tally.so)** forms for both Attendees and Class Representatives. While this consolidated the raw registration information and payment proofs, a centralized application was still needed for admins to **verify registrations against CR payments**, **validate payment screenshots**, and provide a **booth service for dispatching items**.
 
-I built this application to address those needs, but faced an early challenge: data collection had to start before the app itself was ready. This was solved with a **decoupled data ingestion pipeline** that polled the Google Sheets API for new entries. For the event itself, the app ran on a **Google Cloud Platform (GCP)** VM and used a **Supabase PostgreSQL** instance. Since then, the codebase has been significantly refactored with a standardized structure, major UI improvements, and Docker containerization.
+I built this application to address those needs, but faced an early challenge: data collection had to start before the app itself was ready. This was solved with a **decoupled data ingestion pipeline** that polled the Tally API for new entries. For the event itself, the app ran on a **Google Cloud Platform (GCP)** VM and used a **Supabase PostgreSQL** instance. Since then, the codebase has been significantly refactored with a standardized structure, major UI improvements, and Docker containerization.
 
 Leading up to the fest, the system managed over **₹1.2L** in student contributions. Upon admin verification, a WhatsApp worker automatically sent confirmations and unique profile links to **120+ attendees**. During the event, the booth pages handled the distribution of **150+ items** smoothly. Afterward, the data stored in the PostgreSQL instance was essential for the final audit and enabled a transparent accounting of funds and inventory.
 
@@ -62,12 +62,12 @@ This diagram illustrates the complete, end-to-end flow of the system as it was r
 | **Database** | PostgreSQL (Production), SQLite (Optional, for development) |
 | **Frontend (Admin)** | HTML, Bootstrap 5, JavaScript |
 | **Infrastructure** | GitHub Actions, Netlify, GCP, Docker |
-| **Operational Tools** | Google Sheets API, `whatsapp-web.js` (Node.js) |
+| **Operational Tools** | Tally API, `whatsapp-web.js` (Node.js) |
 
 ### Key Features
 - **Secure Admin Panel:** Session-based authentication for admins, with login/logout, password management, and hCaptcha protection on the login page.
 - **Comprehensive Operations:** Admins can verify/reject registrations, approve payments, add/remove booth operators, and review all operational data.
-- **Scheduled Data Ingestion:** A `cron`-scheduled script periodically syncs new entries from two Google Sheets.
+- **Scheduled Data Ingestion:** Periodic scripts sync new entries from Tally API forms (registrations and CR payments).
 - **Automated Profile Updates:**  When admin actions or profile updates flag the database for an update, a `cron`-scheduled script detects it and triggers a GitHub Action to rebuild and deploy the static profile pages to Netlify.
 - **Interactive Booth Page:** A secure, mobile-friendly page authenticated with Operator ID and featuring a **live QR code scanner** to fetch student data and dispatch items.
 - **Automated WhatsApp Notifications:** A decoupled `whatsapp-web.js` worker  polls the backend for new verifications and automatically sends attendees a confirmation message with a link to their profile page.
@@ -177,16 +177,34 @@ For a quick setup without Docker, you can use a local SQLite database.
 
 <summary><h3>Automation & CI/CD Configuration</h3></summary>
 
-This project's automation pipelines are implemented as Flask CLI commands, designed to be run periodically by a scheduler like `cron`. They are divided into two main parts: data ingestion and frontend deployment. Here’s how to configure them:
+This project's automation pipelines are implemented as Flask CLI commands, designed to be run periodically by a scheduler like `cron`. They are divided into two main parts: data ingestion and frontend deployment. Here's how to configure them:
 
 ---
 
 #### Data Ingestion Pipeline
-This pipeline, run by the `flask ingest-data` command, syncs new records from Google Sheets to the database. For this to function, you'll need to set the following environment variables in `.env`:
+This pipeline syncs new records from Tally API forms to the database. There are two separate commands:
 
-*   `GCP_SA_KEY_B64`: The Base64 encoded JSON content of your Google Cloud Service Account key file. This is required for Google Sheets API access.
-*   `REG_SHEET_KEY`: The unique key/ID of the Google Sheet containing student registration data.
-*   `CR_PAY_SHEET_KEY`: The unique key/ID of the Google Sheet containing CR payment data.
+*   **`flask ingest-registration-data`** - Ingests registration form submissions
+*   **`flask ingest-cr-data`** - Ingests CR payment form submissions
+
+For these to function, you'll need to set the following environment variables in `.env`:
+
+*   `TALLY_API_KEY`: Your Tally API bearer token (generate from Tally settings).
+*   `TALLY_REGISTRATION_FORM_ID`: The form ID of the attendee registration Tally form.
+*   `TALLY_CR_FORM_ID`: The form ID of the CR payment collection Tally form.
+
+To test the API ingestion locally or verify your configuration, you can use the included test script:
+
+```bash
+# Test both forms (summary output)
+python backend/ops/test_tally_api.py
+
+# Test registration form only (verbose output)
+python backend/ops/test_tally_api.py --mode registration --output verbose
+
+# Test CR form only
+python backend/ops/test_tally_api.py --mode cr
+```
 
 ---
 

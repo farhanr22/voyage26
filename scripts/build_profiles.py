@@ -20,16 +20,18 @@ OUTPUT_DIR = PROJECT_ROOT / "public"
 ASSETS_DIR = PROJECT_ROOT / "profile_assets"
 TEMPLATE_DIR = PROJECT_ROOT / "scripts" / "templates"
 TEMPLATE_FILE = "profile_template.html"
+PROFILE_PAGES_DIR = OUTPUT_DIR / "p"
 
 # === Helper Functions ===
 
 def setup_output_dir():
-    """Clears and recreates the output directory."""
+    """Clears and recreates the output directories."""
 
     logging.info(f"Preparing output directory: {OUTPUT_DIR}")
     if OUTPUT_DIR.exists():
         shutil.rmtree(OUTPUT_DIR)
-    os.makedirs(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(PROFILE_PAGES_DIR, exist_ok=True)
 
 
 def copy_static_assets():
@@ -137,7 +139,7 @@ def main():
     
     for item in profile_data["data"]:
         rendered_html = template.render(data=item)
-        file_path = OUTPUT_DIR / f"{item['id']}.html"
+        file_path = PROFILE_PAGES_DIR / f"{item['id']}.html"
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(rendered_html)
 

@@ -20,9 +20,10 @@ class Config:
     API_PASSWORD = os.environ["API_PASSWORD"]
     USE_SQLITE = os.environ["USE_SQLITE"] == "True"
 
-    HCAPTCHA_SITE_KEY = os.environ.get("HCAPTCHA_SITE_KEY") or ""
-    HCAPTCHA_SECRET_KEY = os.environ.get("HCAPTCHA_SECRET_KEY") or ""
-    HCAPTCHA_ENABLED = True if os.environ.get("HCAPTCHA_ENABLED") == "True" else False
+    # Cloudflare Turnstile Setup
+    TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY") or ""
+    TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY") or ""
+    TURNSTILE_ENABLED = True if os.environ.get("TURNSTILE_ENABLED") == "True" else False
 
     RATELIMIT_DEFAULT = "120 per minute, 20 per second"
 

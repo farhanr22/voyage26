@@ -19,10 +19,12 @@
         </button>
     </div>
 
-    {% if hcaptcha %}
+    {% if turnstile %}
         <label>Captcha</label>
         <div class="mt-1" style="min-height: 76px;">
-            {{ hcaptcha }}
+            {# flask-turnstile library doesn't support light theme.#}
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            <div class="cf-turnstile" data-sitekey="{{ config.TURNSTILE_SITE_KEY }}" data-theme="light"></div>
         </div>
     {% endif %}
 

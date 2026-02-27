@@ -65,7 +65,7 @@ This diagram illustrates the complete, end-to-end flow of the system as it was r
 | **Operational Tools** | Tally API, `whatsapp-web.js` (Node.js) |
 
 ### Key Features
-- **Secure Admin Panel:** Session-based authentication for admins, with login/logout, password management, and hCaptcha protection on the login page.
+- **Secure Admin Panel:** Session-based authentication for admins, with login/logout, password management, and Cloudflare Turnstile protection on the login page.
 - **Comprehensive Operations:** Admins can verify/reject registrations, approve payments, add/remove booth operators, and review all operational data.
 - **Scheduled Data Ingestion:** Periodic scripts sync new entries from Tally API forms (registrations and CR payments).
 - **Automated Profile Updates:**  When admin actions or profile updates flag the database for an update, a `cron`-scheduled script detects it and triggers a GitHub Action to rebuild and deploy the static profile pages to Netlify.

@@ -7,7 +7,7 @@ from playhouse.db_url import connect
 from .config import Config
 from . import models
 from .models import db_proxy, Admins
-from .extensions import login_manager, hcaptcha, limiter
+from .extensions import login_manager, turnstile, limiter
 
 
 def create_app(config_class=Config):
@@ -38,7 +38,7 @@ def create_app(config_class=Config):
     db_proxy.initialize(database_connection)
 
     login_manager.init_app(app)
-    hcaptcha.init_app(app)
+    turnstile.init_app(app)
     limiter.init_app(app)
 
     from .views.auth import auth_bp

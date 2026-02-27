@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
 
 from ..models import Admins
-from ..extensions import hcaptcha, limiter
+from ..extensions import turnstile, limiter
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -46,7 +46,7 @@ def login():
 
     # Captcha validation done separately from WTForms
     if request.method == 'POST':
-        if not hcaptcha.verify():
+        if not turnstile.verify():
             flash('CAPTCHA verification failed. Please try again.', 'danger')
             return redirect(url_for('auth.login'))
 

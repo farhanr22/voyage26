@@ -24,9 +24,9 @@ COPY --from=builder /opt/venv /opt/venv
 # Copy the application source
 COPY backend/ ./backend/
 
-# Create and switch to a non-root user
-RUN useradd --create-home appuser
-USER appuser
+# Copy worker script
+COPY worker.sh /app/worker.sh
+RUN chmod +x /app/worker.sh
 
 # Activate the virtual environment for subsequent commands
 ENV PATH="/opt/venv/bin:$PATH"

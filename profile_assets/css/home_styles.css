@@ -52,7 +52,7 @@ html {
 }
 
 body {
-    background-color: hsl(228, 100%, 98%);
+    background-color: white;
     font-family: 'Telegraf', Arial, sans-serif;
     font-weight: 400;
     color: #333;
@@ -124,20 +124,27 @@ p.links {
 
 .primary-btn {
     display: inline-block;
-    background-color: var(--btn-primary);
+    background: linear-gradient(135deg,
+        hsl(210, 35%, 55%) 0%,
+        hsl(210, 35%, 55%) 40%,
+        hsl(210, 40%, 35%) 100%);
     color: var(--btn-text);
-    padding: 14px 32px;
+    padding: 14px 25px;
     border-radius: 50px;
     text-decoration: none;
-    font-size: 1.1em;
+    font-size: 1.05em;
     font-weight: bold;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s ease;
+    box-shadow:
+        0 2px 4px hsla(210, 45%, 30%, 0.25),
+        0 4px 10px hsla(210, 50%, 25%, 0.15);
 }
 
 .primary-btn:hover {
-    background-color: var(--btn-primary-hover);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    filter: brightness(0.92) contrast(1.2) hue-rotate(15deg);
+    box-shadow:
+        0 2px 6px hsla(210, 45%, 28%, 0.3),
+        0 5px 14px hsla(210, 50%, 23%, 0.2);
 }
 
 /* =========================================
@@ -196,6 +203,17 @@ p.large-text {
     overflow: hidden;
     border-radius: 24px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.img-red {
+    border: 3px solid hsl(355, 50%, 80%);;
+}
+
+.img-green {
+    border: 3px solid hsl(120, 35%, 85%);
 }
 
 .card-img img {
@@ -204,15 +222,33 @@ p.large-text {
     object-fit: cover;
     object-position: center;
     transition: transform 0.4s ease;
+    display: block;
 }
 
 .card-img:hover img {
     transform: scale(1.05);
 }
 
-.card.c-shadow {
-    --c-shadow-color: 0deg 0% 70%;
-    box-shadow: 0 10px 30px -10px hsl(var(--c-shadow-color) / 0.5);
+
+
+.card.card.c-shadow {
+    --shadow-color: 0deg 0% 80%;
+    box-shadow: 0px 0.5px 0.6px hsl(var(--shadow-color) / 0.16),
+        -0.1px 1.9px 2.5px -0.5px hsl(var(--shadow-color) / 0.22),
+        -0.2px 4.3px 5.6px -0.9px hsl(var(--shadow-color) / 0.29),
+        -0.5px 9.6px 12.4px -1.4px hsl(var(--shadow-color) / 0.35);
+}
+
+.sh-red.card.c-shadow {
+    --shadow-color: 0deg 50% 85%;
+}
+
+.sh-green.card.c-shadow {
+    --shadow-color: 120deg 20% 80%;
+}
+
+.sh-blue.card.c-shadow {
+    --shadow-color: 210deg 40% 80%;
 }
 
 .full-width {
@@ -364,18 +400,21 @@ p.large-text {
         font-size: 1.05em;
     }
 
+    .maincard {
+        padding: 30px 20px;
+    }
+
     .hero-text {
         font-size: 32px;
     }
 
-    .hero-small{
+    .hero-small {
         font-size: 1.2em;
     }
 
-    .primary-btn{
-        font-size: 1em;
+    .primary-btn {
+        font-size: 0.9em;
     }
-
 
     .large-card {
         text-align: left;

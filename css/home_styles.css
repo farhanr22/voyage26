@@ -1,0 +1,495 @@
+/* =========================================
+   FONTS
+   ========================================= */
+@font-face {
+    font-family: 'Telegraf';
+    src: url('../fonts/Telegraf Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Telegraf';
+    src: url('../fonts/Telegraf Light.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Telegraf';
+    src: url('../fonts/Telegraf Bold.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TAN Nimbus';
+    src: url('../fonts/TAN-Nimbus.woff') format('woff');
+}
+
+/* =========================================
+   VARIABLES & GLOBAL STYLES
+   ========================================= */
+:root {
+    --hero-bg: #ffebeb;
+    --hero-text: hsl(210, 35%, 46%);
+    --date-text: hsl(210, 46%, 33%);
+    --dept-text: hsl(209, 55%, 20%);
+
+    --btn-primary: hsl(210, 46%, 33%);
+    --btn-primary-hover: hsl(210, 55%, 20%);
+    --btn-text: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: white;
+    font-family: 'Telegraf', Arial, sans-serif;
+    font-weight: 400;
+    color: #333;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 100px;
+}
+
+/* =========================================
+   HERO SECTION
+   ========================================= */
+.gradient {
+    --shadow-color: 216deg 25% 76%;
+
+    background-image: linear-gradient(315deg,
+            hsl(221, 100%, 90%) 0%,
+            hsl(270, 100%, 96%) 100%);
+    box-shadow: 0.3px 0.2px 0.4px hsl(var(--shadow-color) / 0.4),
+        2.1px 1.4px 2.8px -0.8px hsl(var(--shadow-color) / 0.4),
+        6.1px 3.9px 8.1px -1.7px hsl(var(--shadow-color) / 0.4),
+        15.6px 10.1px 20.9px -2.5px hsl(var(--shadow-color) / 0.4);
+
+}
+
+
+.maincard {
+    text-align: center;
+    padding: 50px 20px;
+    border-radius: 24px;
+    margin: 20px 0 40px 0;
+}
+
+.pre-card {
+    color: var(--dept-text);
+    font-size: 1.15em;
+    line-height: 1.4;
+    margin-bottom: 30px;
+}
+
+.hero-text {
+    color: var(--hero-text);
+    font-family: "TAN Nimbus", sans-serif;
+    font-size: 56px;
+    margin: 10px auto;
+    letter-spacing: -1px;
+}
+
+.hero-small {
+    color: var(--date-text);
+    font-size: 1.3em;
+    margin-bottom: 40px;
+    font-weight: 800;
+}
+
+.buttons-area {
+    margin-top: 20px;
+}
+
+p.links {
+    margin: 0 auto 15px auto;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--dept-text);
+}
+
+.primary-btn {
+    display: inline-block;
+    background: linear-gradient(135deg,
+        hsl(210, 35%, 55%) 0%,
+        hsl(210, 35%, 55%) 40%,
+        hsl(210, 40%, 35%) 100%);
+    color: var(--btn-text);
+    padding: 14px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 1.05em;
+    font-weight: bold;
+    transition: all 0.5s ease;
+    box-shadow:
+        0 2px 4px hsla(210, 45%, 30%, 0.25),
+        0 4px 10px hsla(210, 50%, 25%, 0.15);
+}
+
+.primary-btn:hover {
+    filter: brightness(0.92) contrast(1.2) hue-rotate(15deg);
+    box-shadow:
+        0 2px 6px hsla(210, 45%, 28%, 0.3),
+        0 5px 14px hsla(210, 50%, 23%, 0.2);
+}
+
+/* =========================================
+   INTRO & TYPOGRAPHY
+   ========================================= */
+.large-card {
+    padding: 40px 30px;
+    border-radius: 24px;
+    margin: 40px 0;
+    text-align: center;
+}
+
+p.large-text {
+    font-size: 1.4em;
+    width: 85%;
+    line-height: 1.5;
+    margin: 0 auto;
+    color: #444;
+}
+
+/* =========================================
+   FLEX CARDS (EVENTS, SPORTS, SUBMIT)
+   ========================================= */
+.flex-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 50px;
+    align-items: stretch;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 45px 40px;
+    flex: 1;
+    border-radius: 24px;
+    transition: transform 0.2s ease;
+}
+
+.card h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+}
+
+.card p {
+    font-size: 1.25em;
+    line-height: 1.4;
+    color: #444;
+}
+
+.card-img {
+    flex: 0 0 38%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.img-red {
+    border: 3px solid hsl(355, 50%, 80%);;
+}
+
+.img-green {
+    border: 3px solid hsl(120, 35%, 85%);
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s ease;
+    display: block;
+}
+
+.card-img:hover img {
+    transform: scale(1.05);
+}
+
+
+
+.card.card.c-shadow {
+    --shadow-color: 0deg 0% 80%;
+    box-shadow: 0px 0.5px 0.6px hsl(var(--shadow-color) / 0.16),
+        -0.1px 1.9px 2.5px -0.5px hsl(var(--shadow-color) / 0.22),
+        -0.2px 4.3px 5.6px -0.9px hsl(var(--shadow-color) / 0.29),
+        -0.5px 9.6px 12.4px -1.4px hsl(var(--shadow-color) / 0.35);
+}
+
+.sh-red.card.c-shadow {
+    --shadow-color: 0deg 50% 85%;
+}
+
+.sh-green.card.c-shadow {
+    --shadow-color: 120deg 20% 80%;
+}
+
+.sh-blue.card.c-shadow {
+    --shadow-color: 210deg 40% 80%;
+}
+
+.full-width {
+    flex: 0 0 100%;
+    align-items: center;
+    text-align: center;
+}
+
+.full-width p {
+    max-width: 700px;
+    margin: 0 0 30px 0;
+}
+
+/* =========================================
+   CARD COLOR THEMES
+   ========================================= */
+.flex-layout.red .card {
+    background-color: hsl(6, 100%, 97%);
+}
+
+.flex-layout.red .card h2 {
+    color: hsl(355, 90%, 35%);
+}
+
+.flex-layout.green .card {
+    background-color: hsl(129, 60%, 96%);
+}
+
+.flex-layout.green .card h2 {
+    color: hsl(133, 80%, 28%);
+}
+
+.flex-layout.blue .card {
+    background-color: hsl(210, 80%, 96%);
+}
+
+.flex-layout.blue .card h2 {
+    color: hsl(210, 90%, 35%);
+}
+
+/* =========================================
+   ACTION BUTTONS (SUBMIT SECTION)
+   ========================================= */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: white;
+    color: hsl(210, 90%, 35%);
+    border: 2px solid hsl(210, 90%, 35%);
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.05em;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background-color: hsl(210, 90%, 35%);
+    color: white;
+    /* Removed translate effect */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   CONTACT GRID SECTION
+   ========================================= */
+.contact-section {
+    padding-top: 20px;
+}
+
+.contact-title {
+    color: var(--dept-text);
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    justify-content: center;
+}
+
+.contact-person {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: left;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.contact-person span {
+    display: block;
+}
+
+.contact-person .role {
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.contact-person .name {
+    font-size: 1.4em;
+    color: var(--dept-text);
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.contact-person .batch {
+    font-size: 1.05em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.contact-person .phone {
+    display: inline-block;
+    color: var(--date-text);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 8px 12px;
+    background-color: hsl(210, 50%, 95%);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.contact-person .phone:hover {
+    background-color: hsl(210, 50%, 90%);
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+   ========================================= */
+@media only screen and (max-width: 768px) {
+
+    .pre-card {
+        font-size: 1.05em;
+    }
+
+    .maincard {
+        padding: 30px 20px;
+    }
+
+    .hero-text {
+        font-size: 32px;
+    }
+
+    .hero-small {
+        font-size: 1.2em;
+    }
+
+    .primary-btn {
+        font-size: 0.9em;
+    }
+
+    .large-card {
+        text-align: left;
+        padding: 30px 20px;
+    }
+
+    p.large-text {
+        font-size: 1.15em;
+        width: 100%;
+        text-align: left;
+    }
+
+    .flex-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card-img {
+        order: -1;
+        height: 250px;
+    }
+
+    .card {
+        padding: 30px 20px;
+    }
+
+    .card h2 {
+        font-size: 1.5em;
+    }
+
+    .card p {
+        font-size: 1.1em;
+    }
+
+    .full-width p {
+        margin-bottom: 10px;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .action-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 0.95em;
+        padding: 10px 16px;
+    }
+
+    .full-width {
+        flex: 0 0 100%;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .contact-person {
+        padding: 20px;
+    }
+
+    .contact-person .role {
+        font-size: 0.8em;
+    }
+
+    .contact-person .name {
+        font-size: 1.2em;
+    }
+
+    .contact-person .batch {
+        font-size: 0.95em;
+    }
+
+    .contact-person .phone {
+        font-size: 0.98em;
+        padding: 7px 10px;
+    }
+}

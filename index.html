@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <title>Voyage 2k26</title>
+
+    <link rel="stylesheet" href="/css/home_styles.css">
+
+    <style>
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: 0.3s ease-in all;
+        }
+
+        .loader {
+            width: 17px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: hsl(210, 35%, 46%);
+            display: grid;
+            animation: l22-0 2s infinite linear;
+        }
+
+        .loader:before,
+        .loader:after {
+            content: "";
+            grid-area: 1/1;
+            margin: 15%;
+            border-radius: 50%;
+            background: inherit;
+            transform: rotate(0deg) translate(150%);
+            animation: l22 1s infinite;
+        }
+
+        .loader:after {
+            animation-delay: -.5s
+        }
+
+        @keyframes l22-0 {
+            100% {
+                transform: rotate(1turn)
+            }
+        }
+
+        @keyframes l22 {
+            100% {
+                transform: rotate(1turn) translate(150%)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        <div class="maincard gradient">
+            <div class="pre-card">
+                Dept. of Computer Science and Engineering, University of Kalyani <br>
+                <i>presents :</i>
+            </div>
+            <div class="hero-text">
+                Voyage 2k26
+            </div>
+            <div class="hero-small">
+                29<sup>th</sup> March, 2026
+            </div>
+            <div class="buttons-area">
+                <a href="/register" class="primary-btn">Register Now</a>
+            </div>
+        </div>
+
+        <div class="large-card">
+            <p class="large-text">
+                Join us for an exhilarating celebration that brings together the entire department in a vibrant
+                blend of tradition and creativity! With brand new events planned alongside the usual
+                festivities - there's something captivating for everyone. Mark your calendars for
+                <b> Voyage&nbsp;2k26</b>!
+            </p>
+        </div>
+
+        <div class="flex-layout red">
+            <div class="card c-shadow sh-red">
+                <h2>Main Event</h2>
+                <p>We're looking forward to an afternoon brimming with vibrant cultural performances and artistic
+                    expression. It's a unique opportunity to immerse in the creative showcases and make lasting
+                    memories, as we honor our graduating batches with a warm farewell, welcome the freshers with open
+                    arms, and provide a cherished reunion for our alumni. </p>
+            </div>
+            <div class="card-img img-red">
+                <img src="images/event.jpeg" alt="Stage" loading="lazy">
+            </div>
+        </div>
+
+        <div class="flex-layout green">
+            <div class="card c-shadow sh-green">
+                <h2>Sports Activities</h2>
+                <p>In the week leading up to the main event, gear up for a variety of sports and games! With a mix of
+                    indoor and outdoor activities, it’s a great way for students across different batches to come
+                    together, compete, and have fun. Whether you're in it to win or just to enjoy the moment, there’s
+                    something for everyone!
+                </p>
+            </div>
+            <div class="card-img img-green">
+                <img src="images/sports.jpeg" alt="Field" loading="lazy">
+            </div>
+        </div>
+
+        <div class="flex-layout blue" id="submit">
+            <div class="card c-shadow full-width sh-blue">
+                <h2>Get Involved</h2>
+                <p>Want to contribute to Voyage 2k26? Sign up for activities, submit your best work for the departmental
+                    magazine, or showcase your creativity by submitting a T-shirt design!</p>
+
+                <div class="button-group">
+                    <a href="/submit-magazine" class="action-btn">Magazine Submission</a>
+                    <a href="/participate" class="action-btn">Activity Participation</a>
+                    <a href="/design-tshirt" class="action-btn">Shirt Design Submission</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="large-card contact-section">
+            <h2 class="contact-title">Contact Us</h2>
+            <div class="contact-grid">
+                <div class="contact-person">
+                    <span class="role">General Secretary</span>
+                    <span class="name">Rajesh Pal</span>
+                    <span class="batch">MCA 2<sup>nd</sup> Year</span>
+                    <a href="tel:8509687142" class="phone">📞 8509687142</a>
+                </div>
+                <div class="contact-person">
+                    <span class="role">Asst. General Secretary</span>
+                    <span class="name">Sudip Patra</span>
+                    <span class="batch">B.Tech 3<sup>rd</sup> Year</span>
+                    <a href="tel:6294752513" class="phone">📞 6294752513</a>
+                </div>
+                <div class="contact-person">
+                    <span class="role">Asst. General Secretary</span>
+                    <span class="name">Abhirup Saha</span>
+                    <span class="batch">B.Tech 2<sup>nd</sup> Year</span>
+                    <a href="tel:8538026251" class="phone">📞 8538026251</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.fonts.ready.then(function () {
+                const preloader = document.getElementById('preloader');
+                preloader.style.opacity = '0';
+                setTimeout(function () {
+                    preloader.style.display = 'none';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+
+</html>

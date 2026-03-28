@@ -1,119 +1,127 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
-const readline = require('readline-sync');
-
-// === Helper Functions ===
-const delay = ms => new Promise(res => setTimeout(res, ms));
+import pkg from 'whatsapp-web.js';
+const { Client, LocalAuth } = pkg;
+import qrcode from 'qrcode-terminal';
+import readlineSync from 'readline-sync';
 
 const log = (message, type = 'INFO') => {
     const timestamp = new Date().toLocaleTimeString();
     console.log(`[${timestamp}] [${type}] ${message}`);
 };
 
-// === Main Application ===
-async function main() {
-    log('=== WhatsApp Notification Worker ===');
+// --- UPDATED SMART NUMBER FORMATTER ---
+function formatPhoneNumber(numberStr) {
+    // Strip all non-digits (removes the '+' or any spaces/dashes)
+    let digits = String(numberStr).replace(/\D/g, '');
     
-    // Prompt for all necessary info on startup
-    const apiBaseUrl = readline.question('Enter the API Base URL (e.g., http://127.0.0.1:5000): ');
-    const profileBaseUrl = readline.question('Enter the Profile Pages Base URL (e.g., https://voyage-profiles.netlify.app): ');
-    const apiPassword = readline.question('Enter the API Password: ', { hideEchoBack: true });
+    // If the API gave exactly 10 digits, append the 91
+    if (digits.length === 10) {
+        digits = '91' + digits;
+    }
+    
+    // Safety check
+    if (!digits || digits.length < 10 || digits.length > 15) return null;
+    
+    return `${digits}@c.us`;
+}
+
+async function main() {
+    log('=== Voyage 2k26 Notification Worker ===');
+    
+    const apiBaseUrl = readlineSync.question('Enter API Base URL: ');
+    const profileBaseUrl = readlineSync.question('Enter Profile Base URL: ');
+    const apiPassword = readlineSync.question('Enter API Password: ', { hideEchoBack: true });
 
     if (!apiBaseUrl || !apiPassword || !profileBaseUrl) {
-        log('All fields (API URL, Profile URL, Password) are required. Exiting.', 'ERROR');
-        return;
+        log('All fields required.', 'ERROR');
+        process.exit(1);
     }
 
-    // Setup WhatsApp Client
     const client = new Client({
-        authStrategy: new LocalAuth(),
-        puppeteer: {
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        authStrategy: new LocalAuth({ clientId: 'voyage-worker' }),
+        puppeteer: { 
+            headless: true, 
+            args:['--no-sandbox', '--disable-setuid-sandbox'] 
         }
     });
 
     client.on('qr', qr => {
-        log('QR code received. Please scan with your phone.');
+        log('Scan this QR code:');
         qrcode.generate(qr, { small: true });
     });
 
-    client.on('authenticated', () => {
-        log('WhatsApp client authenticated successfully.');
-    });
-
     client.on('ready', () => {
-        log('WhatsApp client is ready!');
-        log('Starting notification processing loop...');
-        startProcessingLoop(apiBaseUrl, apiPassword, profileBaseUrl, client);
+        log('✅ WhatsApp ready!');
+        pollQueue(apiBaseUrl, apiPassword, profileBaseUrl, client);
     });
 
-    client.on('auth_failure', msg => {
-        log(`Authentication failed: ${msg}`, 'ERROR');
-    });
+    client.on('auth_failure', msg => log(`Auth failure: ${msg}`, 'ERROR'));
 
     client.initialize();
 }
 
-// === The Processing Loop ===
-async function startProcessingLoop(baseUrl, password, profileUrl, client) { // Accept the new profileUrl parameter
-    setInterval(async () => {
-        try {
-            log('Checking for pending notifications...');
-            
-            // Fetch the next notification job
-            const nextJobResponse = await fetch(`${baseUrl}/api/notifications/next`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            });
+async function pollQueue(baseUrl, password, profileUrl, client) {
+    try {
+        const response = await fetch(`${baseUrl}/api/notifications/next`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
 
-            if (!nextJobResponse.ok) {
-                log(`API Error on /next: ${nextJobResponse.statusText}`, 'ERROR');
-                return;
-            }
-
-            const job = await nextJobResponse.json();
+        if (response.ok) {
+            const job = await response.json();
 
             if (job.data) {
                 const { name, phone, student_id } = job.data;
-                log(`Found job for ${name} (${student_id}). ${job.pending_count} pending.`, 'WORK');
+                log(`Job for ${name} (${student_id}). ${job.pending_count} left.`, 'WORK');
                 
-                const chatId = `91${phone}@c.us`;
-
-                // Construct the profile URL
+                // --- FIXED: Pass the raw phone number to our smart formatter ---
+                const chatId = formatPhoneNumber(phone); 
+                
                 const profileLink = `${profileUrl}/${student_id}`;
+                const message = `Hi ${name}!\n\nYour registration for Voyage 2k26 has been confirmed. Check out your profile at ${profileLink}.\n\nRegards,\nFinance, Voyage 2k26\n\n_This is an automated message._`;
 
-                // Fill in message template
-                const message = `Hi ${name}!\n\nYour registration for Voyage 2k25 has been confirmed. Check out your profile at ${profileLink}.\n\nRegards,\nGeneral Secretary, Voyage 2k25\n\n_This is an automated message._`;
-
-                // Send the message
-                await client.sendMessage(chatId, message);
-                log(`Message sent successfully to ${name}.`);
-                
-                // Confirm the job as done
-                const confirmResponse = await fetch(`${baseUrl}/api/notifications/confirm`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password, student_id })
-                });
-
-                if (confirmResponse.ok) {
-                    log(`Confirmed job for ${student_id} as 'Done'.`);
+                if (!chatId) {
+                    log(`Invalid phone for ${name}: ${phone}`, 'ERROR');
                 } else {
-                    log(`Failed to confirm job for ${student_id}.`, 'ERROR');
+                    try {
+                        log(`Checking if ${chatId.replace('@c.us', '')} is registered on WhatsApp...`);
+                        
+                        // Check if number exists on WA
+                        const registeredUser = await client.getNumberId(chatId);
+                        
+                        if (!registeredUser) {
+                            log(`Number is not registered on WhatsApp: ${phone}`, 'ERROR');
+                            
+                            // Let the API know so it doesn't get stuck in an endless loop
+                            await fetch(`${baseUrl}/api/notifications/confirm`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ password, student_id, status: 'invalid_number' })
+                            });
+                        } else {
+                            // Send to the verified, serialized ID
+                            await client.sendMessage(registeredUser._serialized, message);
+                            log(`Message sent to ${name}.`);
+                            
+                            // Confirm job success
+                            await fetch(`${baseUrl}/api/notifications/confirm`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ password, student_id, status: 'success' })
+                            });
+                            log(`Confirmed job for ${student_id}.`);
+                        }
+                    } catch (sendErr) {
+                        log(`Failed to send to ${name}: ${sendErr}`, 'ERROR');
+                    }
                 }
-                
-                await delay(5000); 
-
-            } else {
-                log('No pending notifications found.');
             }
-
-        } catch (error) {
-            log(`An error occurred in the processing loop: ${error.message}`, 'ERROR');
         }
-    }, 15000);
+    } catch (error) {
+        log(`Loop Error: ${error.stack || error}`, 'ERROR');
+    }
+
+    setTimeout(() => pollQueue(baseUrl, password, profileUrl, client), 10000);
 }
 
 main();

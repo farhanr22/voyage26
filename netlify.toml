@@ -1,0 +1,26 @@
+# External redirects
+[[redirects]]
+  from = "/design-tshirt"
+  to = "https://forms.gle/kGF6AGxDVtJcuERV9"
+  status = 302
+
+[[redirects]]
+  from = "/participate"
+  to = "https://forms.gle/vqs6xABaymVWjTZo7"
+  status = 302
+
+[[redirects]]
+  from = "/submit-magazine"
+  to = "https://forms.gle/zRTgtAExRHcvCMpcA"
+  status = 302
+
+[[redirects]]
+  from = "/register"
+  to = "https://tally.so/r/J92OW4"
+  status = 302
+
+# Clean urls
+[[redirects]]
+  from = "/p/:id"
+  to = "/p/:id.html"
+  status = 200

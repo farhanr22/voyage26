@@ -122,22 +122,21 @@ The project is set up to run with Docker and PostgreSQL. However, simpler setups
 
 For a quick setup without Docker, you can use a local SQLite database.
 
-1.  **Create and Activate a Virtual Environment**
+1.  **Sync Virtual Environment & Dependencies using `uv`**
+    ```bash
+    uv sync
+    ```
+    Alternatively, you can create a virtual environment manually:
     *   On macOS/Linux:
         ```bash
-        python3 -m venv venv
-        source venv/bin/activate
+        uv venv
+        source .venv/bin/activate
         ```
     *   On Windows:
         ```powershell
-        python -m venv venv
-        .\venv\Scripts\Activate.ps1
+        uv venv
+        .\.venv\Scripts\Activate.ps1
         ```
-
-2.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
 3.  **Configure the Environment**
     Create a **`.env`** file from the template.
     ```bash

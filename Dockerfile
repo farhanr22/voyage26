@@ -1,35 +1,23 @@
-# Use a slim, multi-stage build 
-FROM python:3.10-slim AS builder
-
-WORKDIR /app
-
-# Create a virtual environment
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN python -m venv $VIRTUAL_ENV
-
-# Copy and install requirements in a separate layer
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-
-# === Final Stage ===
 FROM python:3.10-slim
 
+# Install uv from official Astral image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
-# Copy the virtual environment from the builder stage
-COPY --from=builder /opt/venv /opt/venv
+ENV UV_PROJECT_ENVIRONMENT="/opt/venv" \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    PATH="/opt/venv/bin:$PATH"
 
-# Copy the application source
+# Install dependencies in a separate layer
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Copy application source & worker script
 COPY backend/ ./backend/
-
-# Copy worker script
-COPY worker.sh /app/worker.sh
-RUN chmod +x /app/worker.sh
-
-# Activate the virtual environment for subsequent commands
-ENV PATH="/opt/venv/bin:$PATH"
+COPY worker.sh ./worker.sh
+RUN chmod +x worker.sh
 
 # Expose the port the app runs on
 EXPOSE 5000
